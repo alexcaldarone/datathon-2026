@@ -2,6 +2,7 @@ import json
 import re
 import time
 import os
+import difflib
 from abc import ABC, abstractmethod
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -195,24 +196,30 @@ class AnchorsAugmenter(Augmenter):
     def _get_weights(self, query: str) -> SoftFactWeights:
         query_embedding = self._model.encode(query, convert_to_tensor=True)
         q_lower = query.lower()
+        words = q_lower.split()
         weights_dict = {}
 
-        # Intensity multiplier: 1.0 for neutral queries, > 1.0 when strong importance
-        # keywords are detected (e.g. "muss", "wichtig"). Never flips sign.
-        intensity = 1.0
+        # Intensity logic: base scaler augmented by detected keywords (with typo tolerance)
+        base_intensity = 2.5
+        multiplier = 1.0
         for val, keywords in self.importance_keywords.get("amplify", {}).items():
-            if any(k in q_lower for k in keywords):
-                intensity = max(intensity, float(val))
+            for k in keywords:
+                # Direct substring match
+                if k in q_lower:
+                    multiplier = max(multiplier, float(val))
+                    break
+                # Fuzzy word-level match for typos
+                if any(difflib.SequenceMatcher(None, w, k).ratio() > 0.85 for w in words):
+                    multiplier = max(multiplier, float(val))
+                    break
+
+        intensity = base_intensity * multiplier
 
         for attr, anchor_embeds in self.anchor_embeddings.items():
-            max_sim = float(torch.max(util.cos_sim(query_embedding, anchor_embeds)))
-            
-            # 0.55 is a safer baseline to distinguish from pure noise.
-            baseline = 0
-            raw_weight = max(0.0, (max_sim - baseline) / (1.0 - baseline))
+            avg_sim = float(torch.mean(util.cos_sim(query_embedding, anchor_embeds)))
             
             # Use tanh to scale the similarity in [0, 1]
-            weight = float(torch.tanh(torch.tensor(raw_weight * intensity)))
+            weight = float(torch.tanh(torch.tensor(avg_sim * intensity)))
 
             weights_dict[attr] = round(weight, 2)
 
