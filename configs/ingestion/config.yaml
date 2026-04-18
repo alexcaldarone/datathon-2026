@@ -1,5 +1,5 @@
 embed_dim: 1024
-embed_workers: 16
+embed_workers: 50
 model_id: "amazon.titan-embed-text-v2:0"
 image_model_id: "amazon.titan-embed-image-v1"
 vlm_model_id: "anthropic.claude-3-haiku-20240307-v1:0"

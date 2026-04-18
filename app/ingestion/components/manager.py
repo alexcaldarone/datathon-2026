@@ -7,7 +7,11 @@ from tqdm import tqdm
 
 from app.ingestion.components.augmenters import Augmenter
 from app.ingestion.components.client import OpenSearchClient
-from app.ingestion.components.utils import download_images_batch, parse_features, row_to_full_text, parse_images_json
+from app.ingestion.components.utils import parse_features, row_to_full_text, parse_images_json
+
+def _is_complete(source: dict, fields: list[str]) -> bool:
+    return all(source.get(f) for f in fields)
+
 
 _QUERY = """
     SELECT listing_id, title, description, city, canton, postal_code,
@@ -86,7 +90,7 @@ class IngestionManager:
                         augmented[aug.field_name] = [f.content for f in features]
 
                     docs = self._build_docs(new_rows, listings, augmented)
-                    ok, err = self.client.bulk_upsert(docs)
+                    ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)
                     indexed += ok
                     failed += err
 
@@ -94,7 +98,14 @@ class IngestionManager:
                 bar.update(len(rows))
 
         conn.close()
-        print(f"\nDone. Indexed: {indexed} | Skipped: {skipped} | Failed: {failed}")
+        print(
+            f"\n{'─' * 40}\n"
+            f"  Indexed : {indexed}\n"
+            f"  Skipped : {skipped}  (already complete)\n"
+            f"  Failed  : {failed}\n"
+            f"  Total   : {indexed + skipped + failed}\n"
+            f"{'─' * 40}"
+        )
 
     def _build_docs(
         self,

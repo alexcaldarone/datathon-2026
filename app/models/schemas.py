@@ -70,5 +70,11 @@ class ListingsResponse(BaseModel):
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
+class ValidationResult(BaseModel):
+    is_valid: bool
+    reason: str = ""
+    questions: list[str] = []
+
+
 class HealthResponse(BaseModel):
     status: str

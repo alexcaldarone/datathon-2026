@@ -1,5 +1,13 @@
+paths:
+  path_to_prompts: app/participant/prompts
+
+query_validator:
+  class_name: LLMQueryValidator
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
+
 hard_extractor:
-  class_name: DumbHardExtractor
+  class_name: LLMHardFactExtractor
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 
 soft_extractor:
   class_name: DumbSoftExtractor
@@ -8,7 +16,10 @@ soft_extractor:
 
 soft_filter:
   class_name: HybridSimilarityFilter
-  top_k: 10
+  top_k: 20
 
-ranker:
-  class_name: DumbRanker
+reranker:
+  class_name: CohereReRanker
+  model_id: "cohere.rerank-v3-5:0"
+  top_n: 10
+  region: "us-east-1"

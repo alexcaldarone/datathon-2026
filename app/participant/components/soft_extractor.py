@@ -24,5 +24,5 @@ class SoftFactExtractor(ABC):
 
 
 class DumbSoftExtractor(SoftFactExtractor):
-    def run(self, _query: str) -> dict[str, Any]:
-        return {}
+    def run(self, query: str) -> dict[str, Any]:
+        return {"query": query}

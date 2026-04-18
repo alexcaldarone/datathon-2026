@@ -58,14 +58,27 @@ class OpenSearchClient:
         )
         print("Index and pipeline ready.")
 
-    def bulk_upsert(self, docs: list[dict]) -> tuple[int, int]:
+    def fetch_existing(self, index: str, ids: list[str], fields: list[str]) -> dict[str, dict]:
+        """Returns {id: source} for docs that exist and have the requested fields."""
+        resp = self._client.mget(index=index, body={"ids": ids}, _source_includes=fields)
+        return {
+            doc["_id"]: doc["_source"]
+            for doc in resp["docs"]
+            if doc.get("found") and doc.get("_source")
+        }
+
+    def bulk_upsert(self, docs: list[dict], num_workers: int = 4) -> tuple[int, int]:
         from opensearchpy import helpers
         from opensearchpy.helpers import BulkIndexError
 
         ok = err = 0
         try:
             for success, info in helpers.parallel_bulk(
-                self._client, docs, chunk_size=len(docs), raise_on_error=False
+                self._client,
+                docs,
+                num_workers=num_workers,
+                chunk_size=len(docs),
+                raise_on_error=False
             ):
                 if success:
                     ok += 1

@@ -6,6 +6,7 @@ from typing import Any
 from app.core.hard_filters import HardFilterParams, search_listings
 from app.models.schemas import HardFilters, ListingsResponse
 from app.participant.hard_fact_extraction import extract_hard_facts
+from app.participant.query_validation import validate_query
 from app.participant.ranking import rank_listings
 from app.participant.soft_fact_extraction import extract_soft_facts
 from app.participant.soft_filtering import filter_soft_facts
@@ -22,6 +23,16 @@ def query_from_text(
     limit: int,
     offset: int,
 ) -> ListingsResponse:
+    validation = validate_query(query)
+    if not validation.is_valid:
+        return ListingsResponse(
+            listings=[],
+            meta={
+                "status": "clarification_needed",
+                "reason": validation.reason,
+                "questions": validation.questions,
+            },
+        )
     hard_facts = extract_hard_facts(query)
     hard_facts.limit = limit
     hard_facts.offset = offset

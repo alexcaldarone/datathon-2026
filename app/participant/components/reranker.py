@@ -4,19 +4,20 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any
 
+import boto3
 from omegaconf import DictConfig
 
 from app.models.schemas import ListingData, RankedListingResult
 from app.participant.components.utils import _instantiate
 
-_MODULE = "app.participant.components.ranker"
+_MODULE = "app.participant.components.reranker"
 
 
-def build_ranker(cfg: DictConfig) -> Ranker:
-    return _instantiate(cfg.ranker, _MODULE)
+def build_reranker(cfg: DictConfig) -> ReRanker:
+    return _instantiate(cfg.reranker, _MODULE)
 
 
-class Ranker(ABC):
+class ReRanker(ABC):
     def __init__(self, cfg: DictConfig):
         self.cfg=cfg
 
@@ -29,7 +30,7 @@ class Ranker(ABC):
         pass
 
 
-class DumbRanker(Ranker):
+class DumbReRanker(ReRanker):
     def run(
         self,
         candidates: list[dict[str, Any]],
@@ -93,3 +94,59 @@ def _coerce_image_urls(value: Any) -> list[str] | None:
         if isinstance(parsed, list):
             return [str(item) for item in parsed]
     return None
+
+
+def _to_document_text(c: dict[str, Any]) -> str:
+    features = c.get("features") or []
+    parts = [
+        c.get("title", ""),
+        c.get("description", ""),
+        f"Location: {c.get('city', '')}, {c.get('canton', '')}",
+        f"Price: CHF {c.get('price', '')}",
+        f"Rooms: {c.get('rooms', '')}",
+        f"Area: {c.get('area', '')} sqm",
+        f"Features: {', '.join(features)}",
+    ]
+    return " | ".join(p for p in parts if p.strip())
+
+
+class CohereReRanker(ReRanker):
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+        self._client = boto3.client("bedrock-runtime", region_name=cfg.region)
+
+    def run(
+        self,
+        candidates: list[dict[str, Any]],
+        soft_facts: dict[str, Any],
+    ) -> list[RankedListingResult]:
+        if not candidates:
+            return []
+
+        query = soft_facts.get("query", "")
+        texts = [_to_document_text(c) for c in candidates]
+        top_n = min(int(self.cfg.top_n), len(candidates))
+
+        body = json.dumps({
+            "query": query,
+            "documents": texts,
+            "top_n": top_n,
+            "api_version": 2,
+        })
+        raw = self._client.invoke_model(
+            modelId=self.cfg.model_id,
+            accept="application/json",
+            contentType="application/json",
+            body=body,
+        )
+        response = json.loads(raw["body"].read())
+
+        return [
+            RankedListingResult(
+                listing_id=str(candidates[r["index"]]["listing_id"]),
+                score=float(r["relevance_score"]),
+                reason=f"Cohere Rerank score: {r['relevance_score']:.4f}",
+                listing=_to_listing_data(candidates[r["index"]]),
+            )
+            for r in response["results"]
+        ]
