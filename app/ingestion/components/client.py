@@ -56,14 +56,18 @@ class OpenSearchClient:
             if doc.get("found") and doc.get("_source")
         }
 
-    def bulk_upsert(self, docs: list[dict]) -> tuple[int, int]:
+    def bulk_upsert(self, docs: list[dict], num_workers: int = 4) -> tuple[int, int]:
         from opensearchpy import helpers
         from opensearchpy.helpers import BulkIndexError
 
         ok = err = 0
         try:
             for success, info in helpers.parallel_bulk(
-                self._client, docs, chunk_size=len(docs), raise_on_error=False
+                self._client,
+                docs,
+                num_workers=num_workers,
+                chunk_size=len(docs),
+                raise_on_error=False
             ):
                 if success:
                     ok += 1

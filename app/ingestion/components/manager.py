@@ -82,7 +82,7 @@ class IngestionManager:
                         augmented[aug.field_name] = [f.content for f in features]
 
                     docs = self._build_docs(new_rows, listings, augmented)
-                    ok, err = self.client.bulk_upsert(docs)
+                    ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)
                     indexed += ok
                     failed += err
 
