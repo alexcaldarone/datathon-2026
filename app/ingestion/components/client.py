@@ -76,7 +76,7 @@ class OpenSearchClient:
             for success, info in helpers.parallel_bulk(
                 self._client,
                 docs,
-                num_workers=num_workers,
+                thread_count=num_workers,
                 chunk_size=len(docs),
                 raise_on_error=False
             ):
