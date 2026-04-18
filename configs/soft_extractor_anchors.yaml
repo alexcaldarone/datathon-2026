@@ -1,124 +1,259 @@
 daylight_score:
-  - bright apartment with sun
-  - natural light
-  - floor to ceiling windows
-  - sunny balcony
-  - Helle Wohnung mit viel Sonne
-  - lichtdurchflutet
-  - direkte Sonneneinstrahlung
-  - grosse Fenster
-  - vül sunne am Nomittag
-  - helli Zimmer
-  - sunnig und schön
+  - helle Wohnung mit viel Tageslicht
+  - lichtdurchflutete Raeume
+  - grosse Fenster mit direkter Sonneneinstrahlung
+  - sonnige Suedlage mit viel Licht
+  - Wohnung mit viel natuerlichem Licht
+  - viel Sonne den ganzen Tag
+  - helle Zimmer und lichtdurchflutet
+  - Wohnung mit Abendsonne
+  - Morgensonne im Schlafzimmer
+  - helli Wohnig mit viel Sunne
+  - lichtdurchflutet und sonnig
+  - Suedseite mit direkter Sonne
+  - sehr helle Wohnung bevorzugt
+  - sonnendurchflutet ganztaegig
+  - Tageslicht sehr wichtig fuer mich
+  - Fenster die viel Licht reinlassen
+  - Wohnung mit viel Sonne am Nachmittag
+  - hell und luftig soll es sein
+  - sunnigs Zuhause sehr wichtig
+orientation_quality:
+  - Suedausrichtung der Wohnung gewuenscht
+  - Wohnung mit Suedwestlage bevorzugt
+  - Ostseite fuer Morgensonne im Schlafzimmer
+  - sonnige Ausrichtung sehr wichtig
+  - gute Himmelsausrichtung gewuenscht
+  - Suedlage damit die Sonne reinkommt
+  - Westseite mit Abendsonne bevorzugt
+  - optimale Ausrichtung zur Sonne
+  - Wohnung soll Richtung Sueden zeigen
+  - ich lege Wert auf Suedausrichtung
+  - Sonnenseite des Gebaeudes sehr wichtig
+  - d Wohnig soll sunsiitig si
 noise_level:
-  - quiet area away from traffic
-  - peaceful residential neighborhood
-  - soundproof windows
-  - calm environment
-  - Ruhiges Quartier ohne Strassenlärm
-  - schalldichte Fenster
-  - keine Fluglärm
-  - seriöse ruhige Lage
-  - ganz ruhig
-  - kei Lärm idä Nacht
-  - stilli Umgäbig
+  - ruhiges Wohnquartier ohne Strassenlaerm
+  - stille Umgebung sehr wichtig
+  - Wohnung in ruhiger Lage gesucht
+  - kein Strassenlaerm erwuenscht
+  - laermgeschuetzte Lage bevorzugt
+  - ruhige Wohnlage ist mir sehr wichtig
+  - kein Verkehrslaerm in der Nacht
+  - schalldichte Fenster und ruhige Strasse
+  - Ruhe ist mir beim Wohnen sehr wichtig
+  - ganz ruhige Lage gesucht
+  - keine Fluglaerm oder Zugslaerm
+  - verkehrsberuhigte Zone bevorzugt
+  - Tempo-30-Zone oder ruhige Seitenstrasse
+  - ruhiger Innenhof
+  - stilli Umgaebig isch mer sehr wichtig
+  - ich schlafe schlecht bei Laerm
+  - ruhigs Quartier dringend gesucht
+  - Laermbelastung muss minimal sein
+  - kein Durchgangsverkehr vor dem Haus
+  - ich brauche absolute Stille zum Schlafen
+  - ich vermeide laute Quartiere
+  - laermfreie Umgebung sehr wichtig
+  - serioes ruhige Wohnlage gewuenscht
+  - ruhig und leise
+  - absolute Stille wichtig
+  - stille Wohnlage gesucht
+  - Wohnung soll ruhig sein
+  - ruhige Wohnumgebung gewuenscht
+  - ruhige gepflegte Wohnlage sehr wichtig
+  - keine laute Strassenlage bitte
+  - ruhig und naturnah gelegen
+  - ruhige Wohnlage und angenehme Umgebung
+  - die Wohnlage soll ruhig und beschaulich sein
+  - kein Laerm und keine Stoerungen gewuenscht
+  - ruhige Wohnlage ist fuer uns sehr wichtig
+  - ruhige und schoene Wohnlage bevorzugt
+sound_insulation_quality:
+  - gute Schalldaemmung sehr wichtig
+  - Nachbarn sollte man nicht hoeren
+  - dicke Waende und gute Isolation
+  - Dreifachverglasung oder gute Fenster
+  - schallgeschuetzte Wohnung gesucht
+  - man soll die Nachbarn nicht hoeren
+  - akustisch gut gedaemmte Wohnung
+  - kein Trittschall von oben
+  - Schalldaemmung ist mir sehr wichtig
+  - ich will keine Geraeusche von Nachbarn hoeren
+  - guti Schalldaemmig isch sehr wichtig
+  - Wohnung wo mer d Nachbarn noed hoert
+  - dicke Mauern fuer Ruhe in der Wohnung
+  - Laerm von Nachbarn ist ein No-Go
 view_quality_score:
-  - apartment with a view
-  - panoramic mountain view
-  - lake view from rooftop
-  - stunning city skyline
-  - Wohnung mit schöner Aussicht
-  - Seesicht
-  - Bergblick
-  - Weitblick über die Stadt
-  - super Ussicht uf d Alpe
-  - Zürisee Blick
-  - mer gseht d Berge
+  - Wohnung mit schoener Aussicht gesucht
+  - Panoramablick auf die Berge gewuenscht
+  - Seesicht sehr wichtig
+  - Weitblick ueber die Stadt
+  - Aussicht auf den Zuerichsee bevorzugt
+  - herrliche unverbaubare Aussicht
+  - Bergblick aus dem Wohnzimmer
+  - schoene Aussicht ist mir sehr wichtig
+  - Blick in die Natur oder auf den See
+  - ich moechte eine schoene Aussicht haben
+  - Alpenpanorama vom Balkon
+  - Dachterrasse mit Fernblick
+  - tolli Ussicht isch mir sehr wichtig
+  - unverbaubare Aussicht sehr wichtig
+  - Blick ueber die Daecher der Stadt
 green_view_ratio:
-  - near nature and parks
-  - overlooking a garden
-  - green surroundings
-  - forest nearby
-  - In der Nähe von Parks und Grünflächen
-  - Gartenanteil
-  - Blick ins Grüne
-  - Naturnah
-  - nöch a dr Natur
-  - mer gseht Bäum und Gras
-  - bi de Allemände
+  - Naehe zu Parks und Gruenflaehen wichtig
+  - Blick ins Gruene sehr schoen
+  - naturnahes Wohnumfeld gesucht
+  - Wald oder Park in der Naehe
+  - gruene Umgebung sehr wichtig
+  - Gartenblick aus dem Fenster
+  - Baeume und Natur vor dem Haus
+  - Gruenflaehen in der Umgebung wichtig
+  - ich moechte nah an der Natur wohnen
+  - Wohnung mit Gartenanteil bevorzugt
+  - Wiese und Natur vor der Haustuer
+  - Park oder Wald in Gehdistanz
+  - umgeben von Baeumen und Gaerten
+  - gruenes Wohnquartier stark bevorzugt
 walkability_score:
-  - close to shops and groceries
-  - central location near amenities
-  - walkable distance to pharmacy
-  - Einkaufsmöglichkeiten zu Fuss erreichbar
-  - zentrale Lage
-  - Migros Coop in der Nähe
-  - Gute Inchauschance
-  - mer cha alles z Fuäss mache
-  - nöch bim Coop
+  - Einkaufsmoeglichkeiten zu Fuss erreichbar
+  - alles in Gehdistanz vom Haus
+  - Migros oder Coop ums Eck
+  - lebendiges Quartier mit Laeden
+  - zentrumsnahe Lage sehr wichtig
+  - Baeckerei und Apotheke zu Fuss erreichbar
+  - ich moechte alles zu Fuss erledigen
+  - Supermarkt in unmittelbarer Naehe
+  - gute Infrastruktur im Quartier
+  - Restaurants und Cafes in der Naehe
+  - ich mag urbanes Leben mit vielen Laeden
+  - Quartier mit guter Grundversorgung
+  - mitten im Geschehen wohnen
+  - kurze Wege zu Alltaeglichem wichtig
 public_transport_score:
-  - near public transport tram train
-  - good connection to city center
-  - short walk to station
-  - Gute Anbindung an ÖV
-  - Bahnhof in der Nähe
-  - Tramhaltestelle vor der Tür
-  - nöch bi de Tramstation
-  - S-Bahn Aaschluss
-  - gueti Verbindig
-interior_modernity:
-  - modern high-end interior
-  - newly renovated finishings
-  - dishwasher and washing machine
-  - luxury kitchen
-  - Moderne hochwertige Innenausstattung
-  - Erstbezug nach Sanierung
-  - Geschirrspüler vorhanden
-  - modärni Chuchi
-  - alles neu renoviert
-  - luxuriösi Usstattig
-  - Abwäschmaschine
-work_from_home_fitness:
-  - home office with high speed internet
-  - quiet for focused work
-  - fiber optic connection
-  - Idealer Arbeitsplatz für Home Office
-  - Glasfaseranschluss
-  - schnelles Internet
-  - home office tauglich
-  - guets WLAN
-  - schnells Netz
-spaciousness_perception:
-  - large rooms high ceilings
-  - generous floor plan
-  - airy atmosphere
-  - open living surface
-  - Grosszügige Zimmer
-  - hohe Decken
-  - offener Grundriss
-  - viel Platz
-  - groissi Zimmer
-  - luftig
-  - grosszuegigs Wohnzimmer
+  - gute Anbindung an den oeffentlichen Verkehr
+  - Tramhaltestelle vor der Haustuer
+  - Bahnhof in Gehdistanz
+  - S-Bahn-Anschluss in der Naehe
+  - optimale OeV-Anbindung sehr wichtig
+  - Bushaltestelle direkt vor dem Haus
+  - wenige Minuten zur naechsten Haltestelle
+  - gute Verbindung ins Stadtzentrum
+  - ich moechte kein Auto brauchen
+  - S-Bahn fusslaeuefig vom Wohnort
+  - OeV-Anschluss ist mir sehr wichtig
+  - ich fahre taeglich mit dem OeV
+  - taeglich mit Tram oder Bus unterwegs
+  - ohne Auto auf OeV angewiesen
+centrality_index:
+  - zentrale Lage in der Stadt
+  - mitten in der Stadt wohnen
+  - Innenstadtlage sehr bevorzugt
+  - im Herzen der Stadt wohnen
+  - sehr zentrale Lage gewuenscht
+  - zentrumsnah und urban wohnen
+  - ich moechte zentral in der Stadt wohnen
+  - Wohnung im Stadtzentrum gesucht
+  - mitten im Stadtleben wohnen
+  - ich vermeide Randlagen und Vororte
+  - zentrumsnahe Lage ein Muss fuer mich
 neighborhood_safety_score:
-  - safe family friendly area
-  - kids playing outside
-  - low crime neighborhood
-  - schools and kindergartens nearby
-  - Sicheres familienfreundliches Wohnquartier
-  - verkehrsberuhigte Zone
-  - Schule in der Nähe
-  - guet für Chind
-  - sicher zum Spiele
-  - familiefründlich
+  - sicheres und familienfreundliches Quartier
+  - sicherer Schulweg fuer Kinder wichtig
+  - ruhiges Familienquartier gesucht
+  - Kinder koennen draussen spielen
+  - sicheres Wohnumfeld sehr wichtig
+  - kriminalarmes Quartier bevorzugt
+  - familienfreundliche sichere Umgebung
+  - Spielplatz und Schulen in der Naehe
+  - sicheres Quartier ist mir sehr wichtig
+  - ich moechte mich nachts sicher fuehlen
+  - ich vermeide unsichere Stadtteile
+  - sicherer Schulweg ist ein Muss
+  - kinderfreundliches Quartier gesucht
 proximity_to_desired_location_score:
-  - close to specific destination
-  - near university
-  - walking distance to workplace
-  - 15 minutes from city center
-  - In der Nähe vom Zielort
-  - kurzer Arbeitsweg
-  - Uni Nähe
-  - nöch bi de Arbet
-  - schnäll bi de Uni
-  - öppe 10 minete vo de Stadt
+  - kurzer Arbeitsweg sehr wichtig
+  - nah an der Universitaet wohnen
+  - wenige Minuten zum Buero
+  - kurze Distanz zum Hauptbahnhof
+  - nah am Zielort wohnen
+  - kurzer Schulweg fuer die Kinder
+  - nahe beim Spital oder der Uni
+  - Pendeldistanz muss kurz sein
+  - ich moechte nah an der Arbeit wohnen
+  - in der Naehe der ETH wohnen
+  - kurzer Weg zur Uni oder zum Job
+  - ich vermeide lange Arbeitswege
+  - Naehe zum Arbeitsplatz ist ein Muss
+  - Pendelzeit sollte minimal sein
+air_quality_index:
+  - frische Luft sehr wichtig
+  - keine Luftverschmutzung in der Umgebung
+  - saubere Luft ist mir wichtig
+  - weit weg von Abgasen und Verkehr
+  - Luftqualitaet ist ein wichtiges Kriterium
+  - keine Industrie oder Verkehr in der Naehe
+  - gute Luftqualitaet im Quartier
+  - ich moechte nicht neben einer Hauptstrasse wohnen
+  - saubere Luft und wenig Abgase
+  - ich vermeide Lagen with schlechter Luft
+  - frische Luft isch mer sehr wichtig
+  - keine Abgase vom Verkehr wichtig
+  - abseits von stark befahrenen Strassen
+spaciousness_perception:
+  - grosse Zimmer und hohe Decken
+  - grosszuegiger Grundriss bevorzugt
+  - viel Platz und Stauraum gewuenscht
+  - offenes Wohnkonzept sehr schoen
+  - luftige und grosszuegige Wohnung
+  - ich brauche viel Platz zum Wohnen
+  - loftartige Wohnung mit hohen Decken
+  - grosse Kueche und grosses Wohnzimmer
+  - Wohnung soll sehr geraeumig sein
+  - viel Stauraum und guter Grundriss
+  - hohe Raeume und offener Grundriss
+  - vill Platz zum Wohne isch wichtig
+  - grosszuegige Wohnflaeche ein Muss
+  - offenes Wohnen with viel Raum
+interior_modernity:
+  - moderne hochwertige Innenausstattung gewuenscht
+  - neu renovierte Wohnung bevorzugt
+  - moderni Chuchi mit neuen Geraeten
+  - Erstbezug nach Sanierung sehr interessant
+  - zeitgemaesse und moderne Einrichtung
+  - Designerkueche und hochwertige Boeden
+  - Fussbodenheizung und Regendusche
+  - V-Zug Geraete und moderne Kueche
+  - Wohnung soll frisch renoviert sein
+  - neuste Haushaltgeraete gewuenscht
+  - moderne Ausstattung ist mir wichtig
+  - ich bevorzuge neu renovierte Wohnungen
+  - alles neu und modern eingerichtet
+  - hochwertiger Parkett oder Naturstein
+  - Neubau oder frisch saniert bevorzugt
+livability_score:
+  - hohes Wohnqualitaetsniveau sehr wichtig
+  - lebendiges und angenehmes Quartier
+  - schoene Nachbarschaft und gutes Umfeld
+  - angenehme Wohnqualitaet gewuenscht
+  - gutes Quartier with hoher Lebensqualitaet
+  - ich moechte in einem schoenen Quartier leben
+  - tolle Nachbarschaft und gutes Klima im Quartier
+  - Wohnqualitaet ist mir sehr wichtig
+  - ich lege Wert auf gutes Wohnumfeld
+  - ich vermeide unangenehme Quartiere
+  - schoens Quartier with gutem Wohnklima
+work_from_home_fitness:
+  - Homeoffice-taugliche Wohnung gesucht
+  - separates Arbeitszimmer sehr wichtig
+  - schnelles Internet fuer Remote-Arbeit noetig
+  - Glasfaseranschluss gewuenscht
+  - ruhiger Arbeitsplatz in der Wohnung
+  - ich arbeite taeglich von zu Hause
+  - gutes WLAN und schnelles Internet wichtig
+  - Wohnung with eigenem Bueroraum bevorzugt
+  - Homeoffice-Ecke oder Arbeitszimmer noetig
+  - ruhige Wohnung fuer Videokonferenzen
+  - ich bin auf schnelles Internet angewiesen
+  - Home Office isch taeglich mein Alltag
+  - Remote Work ist mein Arbeitsmodell
+  - schnells Internet isch ein Muss fuer mich
