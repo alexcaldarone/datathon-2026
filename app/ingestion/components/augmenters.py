@@ -15,7 +15,6 @@ import requests
 from omegaconf import DictConfig
 from pydantic import BaseModel
 
-from app.ingestion.components.utils import fetch_hero_image
 
 
 def build_augmenters(cfg: DictConfig) -> list["Augmenter"]:
@@ -201,7 +200,7 @@ class ImageEmbeddingAugmenter(Augmenter):
         }
 
     def augment(self, listing: dict) -> AugmentedFeature:
-        image_bytes = fetch_hero_image(listing)
+        image_bytes = listing.get("_image_bytes")
         if image_bytes:
             embedding = self._embed_image(image_bytes)
         else:
@@ -293,7 +292,7 @@ class VLMFeatureAugmenter(Augmenter):
         }
 
     def augment(self, listing: dict) -> AugmentedFeature:
-        image_bytes = fetch_hero_image(listing)
+        image_bytes = listing.get("_image_bytes")
         if not image_bytes:
             return AugmentedFeature(name=self.field_name, type=self.feature_type, content={})
         scores = self._analyze_image(image_bytes)
@@ -478,7 +477,7 @@ class GeoFeatureAugmenter(Augmenter):
 
     def __init__(self, cfg: DictConfig):
         super().__init__(cfg)
-        self._overpass_url = cfg.get("overpass_url", "https://overpass.private.coffee/api/interpreter")
+        self._overpass_url = cfg.get("overpass_url", "https://overpass.osm.ch/api/")
         self._workers = int(cfg.get("overpass_workers", 20))
 
     @property

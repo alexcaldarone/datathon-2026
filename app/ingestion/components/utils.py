@@ -1,5 +1,6 @@
 import json
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import requests
@@ -67,3 +68,20 @@ def _first_url_from_json(images_json: str | None) -> str | None:
     if isinstance(parsed, list) and parsed:
         return str(parsed[0]) if parsed[0] else None
     return None
+
+def download_images_batch(listings: list[dict], max_workers: int = 8) -> None:
+    def _download_one(listing: dict) -> None:
+        listing["_image_bytes"] = fetch_hero_image(listing)
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        list(pool.map(_download_one, listings))
+
+
+def parse_images_json(images_json: str):
+    if not images_json:
+        return []
+    try:
+        images = json.loads(images_json)
+        return [i["url"] for i in images["images"]]
+    except (json.JSONDecodeError, TypeError):
+        return []

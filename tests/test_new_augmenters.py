@@ -50,29 +50,17 @@ class FakeBedrockVLM:
         return {"body": io.BytesIO(body.encode())}
 
 
-class FakeImageResponse:
-    status_code = 200
-    content = b"\x89PNG\r\n\x1a\n fake image bytes"
-
-    def raise_for_status(self) -> None:
-        pass
-
-
 def test_vlm_augmenter_returns_scores(monkeypatch) -> None:
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
     monkeypatch.setattr(
         "app.ingestion.components.augmenters.boto3.client",
         lambda *a, **kw: FakeBedrockVLM(),
     )
-    monkeypatch.setattr(
-        "app.ingestion.components.utils.requests.get",
-        lambda *a, **kw: FakeImageResponse(),
-    )
 
     cfg = OmegaConf.create(_base_cfg())
     augmenter = VLMFeatureAugmenter(cfg)
 
-    listing = {"full_text": "Bright flat", "hero_image_url": "https://example.com/img.jpg"}
+    listing = {"full_text": "Bright flat", "_image_bytes": b"\x89PNG fake image"}
     result = augmenter.augment(listing)
 
     assert isinstance(result, AugmentedFeature)
@@ -93,7 +81,7 @@ def test_vlm_augmenter_handles_no_image(monkeypatch) -> None:
     cfg = OmegaConf.create(_base_cfg())
     augmenter = VLMFeatureAugmenter(cfg)
 
-    listing = {"full_text": "No image flat", "hero_image_url": None, "images_json": None}
+    listing = {"full_text": "No image flat", "_image_bytes": None}
     result = augmenter.augment(listing)
 
     assert result.content == {}

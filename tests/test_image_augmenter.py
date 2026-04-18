@@ -20,14 +20,6 @@ class FakeBedrockClient:
         return {"body": io.BytesIO(json.dumps({"embedding": _FAKE_EMBEDDING}).encode())}
 
 
-class FakeResponse:
-    status_code = 200
-    content = b"\x89PNG\r\n\x1a\n fake image bytes"
-
-    def raise_for_status(self) -> None:
-        pass
-
-
 def _base_cfg() -> dict:
     return {
         "embed_dim": 1024,
@@ -48,17 +40,13 @@ def test_image_augmenter_returns_augmented_feature(monkeypatch) -> None:
         "app.ingestion.components.augmenters.boto3.client",
         lambda *a, **kw: FakeBedrockClient(),
     )
-    monkeypatch.setattr(
-        "app.ingestion.components.augmenters.requests.get",
-        lambda *a, **kw: FakeResponse(),
-    )
 
     cfg = OmegaConf.create(_base_cfg())
     augmenter = ImageEmbeddingAugmenter(cfg)
 
     listing = {
         "full_text": "Bright apartment in Zurich",
-        "hero_image_url": "https://example.com/image.jpg",
+        "_image_bytes": b"\x89PNG\r\n\x1a\n fake image bytes",
     }
     result = augmenter.augment(listing)
 
@@ -81,8 +69,7 @@ def test_image_augmenter_falls_back_to_text_when_no_image(monkeypatch) -> None:
 
     listing = {
         "full_text": "Modern studio in Geneva",
-        "hero_image_url": None,
-        "images_json": None,
+        "_image_bytes": None,
     }
     result = augmenter.augment(listing)
 
