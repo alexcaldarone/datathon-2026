@@ -36,8 +36,8 @@ class LLMSoftExtractor(SoftFactExtractor):
 
     def __init__(self, cfg: DictConfig):
         super().__init__(cfg)
-        self.results = {}
         self.weights = SoftFactWeights()
+        self.buildings = list[Property]
         if LLMSoftExtractor._model is None:
             # Load the multilingual model requested by the user
             LLMSoftExtractor._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
@@ -177,13 +177,35 @@ class LLMSoftExtractor(SoftFactExtractor):
 
     def run(self, query: str) -> list[dict[str, Any]]:
         self.get_weights(query)
-        return []
+        
+        self.results = []
+
+        indicator = 1 # between 0 and 1
+
+        for building in self.building:
+            included = True
+            for attr, weight in building.weights.model_dump().items():
+                if(weight < self.weights.attr * indicator):
+                    included = False
+                    break
+            if(included):
+                self.results.append({
+                    "id": building.id,
+                    "info": building.info,
+                    "weights": building.weights
+                })
+
+        return self.results
 
 # ???
 class Property():
-    def __init__(self, id: str, info: dict):
+    def __init__(self, id: str, info: dict, weights: SoftFactWeights):
         self.id = id
         self.info = info
+        self.weights = weights
+
+        # Compute weight logic here
+    
 
 class DumbSoftExtractor(SoftFactExtractor):
     def run(self, _query: str) -> dict[str, Any]:
