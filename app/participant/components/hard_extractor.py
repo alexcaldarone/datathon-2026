@@ -7,7 +7,7 @@ load_dotenv("../../../.env")
 
 from pydantic_ai import Agent
 
-from app.models.schemas import HardFilters
+from app.models.schemas import ClarificationRequest, HardFilters
 
 
 class HardFactExtractor(ABC):
@@ -33,7 +33,7 @@ Rules:
 - "for rent" / "to buy" / "purchase" → offer_type (RENT or SALE)
 - Vague preferences ("bright", "modern", "nice area", "good location") are NOT hard filters — omit them.
 - "not too expensive" is soft — do NOT set max_price.
-- "close to public transport" is soft — do NOT set any filter for it.
+- "close to public transport" or any other measure of closeness is soft — do NOT set any filter for it.
 - If unsure whether something is hard or soft, omit it (err on fewer filters).
 - Default offer_type to "RENT" if the user does not explicitly mention buying or purchasing.
 
@@ -71,6 +71,9 @@ Here is an example of how hard facts would be extracted from a user query:
         Hard requirements: Studio, Geneva, June move-in
         Explanation: This query has some clear hard requirements: studio (as it informs the number of rooms), Geneva (location) and the move-in date.
         The nice views are a soft requirement which require different data sources to answer.
+
+Other important rules to respect:
+- If a prompt is in a language different from english, translate it to english and use that to extract the relevant information.
 """
 
 class LLMHardFactExtractor(HardFactExtractor):
