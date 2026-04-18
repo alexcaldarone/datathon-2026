@@ -58,14 +58,11 @@ class LLMSoftExtractor(SoftFactExtractor):
         else:
             self.importance_keywords = {}
 
-        # Pre-compute anchor embeddings for positive and negative phrase sets
+        # Pre-compute anchor embeddings
         self.anchor_embeddings = {
-            attr: {
-                side: self._model.encode(phrases, convert_to_tensor=True)
-                for side, phrases in sides.items()
-                if isinstance(phrases, list) and phrases
-            }
-            for attr, sides in self.anchors.items()
+            attr: self._model.encode(phrases, convert_to_tensor=True)
+            for attr, phrases in self.anchors.items()
+            if isinstance(phrases, list) and phrases
         }
 
     # Prompt (not used)
@@ -109,17 +106,15 @@ class LLMSoftExtractor(SoftFactExtractor):
             if any(k in q_lower for k in keywords):
                 intensity = max(intensity, float(val))
 
-        for attr, sides in self.anchor_embeddings.items():
-            pos_embeddings = sides.get("positive")
-            neg_embeddings = sides.get("negative")
-
-            max_pos_sim = float(torch.max(util.cos_sim(query_embedding, pos_embeddings))) if pos_embeddings is not None else 0.0
-            max_neg_sim = float(torch.max(util.cos_sim(query_embedding, neg_embeddings))) if neg_embeddings is not None else 0.0
-
-            # Raw directional score. tanh(k * raw) amplifies clear signals
-            # toward ±1 while keeping neutral queries near 0.
-            raw = max_pos_sim - max_neg_sim
-            weight = float(torch.tanh(torch.tensor(raw * 3.0 * intensity)))
+        for attr, anchor_embeds in self.anchor_embeddings.items():
+            max_sim = float(torch.max(util.cos_sim(query_embedding, anchor_embeds)))
+            
+            # 0.55 is a safer baseline to distinguish from pure noise.
+            baseline = 0.55
+            raw_weight = max(0.0, (max_sim - baseline) / (1.0 - baseline))
+            
+            # Use tanh to scale the similarity in [0, 1]
+            weight = float(torch.tanh(torch.tensor(raw_weight * 2.0 * intensity)))
 
             weights_dict[attr] = round(weight, 2)
 
@@ -142,16 +137,9 @@ class LLMSoftExtractor(SoftFactExtractor):
             query_weights_dict = extracted_weights.model_dump()
 
             for attr, required_weight in query_weights_dict.items():
-                if required_weight > 0:
+                if required_weight > 0.1:  # Only filter if there's a significant requirement
                     building_weight = building_weights_dict.get(attr, 0)
                     if building_weight < (required_weight * indicator):
-                        included = False
-                        break
-                elif required_weight < 0:
-                    building_weight = building_weights_dict.get(attr, 0)
-                    # For negative weights, we want building_weight to be low
-                    # If required_weight = -1.0, building_weight must be < (1.0 - 0.8) = 0.2
-                    if building_weight > (1.0 + required_weight * indicator):
                         included = False
                         break
             

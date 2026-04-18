@@ -208,11 +208,11 @@ class AnchorsAugmenter(Augmenter):
             max_sim = float(torch.max(util.cos_sim(query_embedding, anchor_embeds)))
             
             # 0.55 is a safer baseline to distinguish from pure noise.
-            baseline = 0.55
+            baseline = 0
             raw_weight = max(0.0, (max_sim - baseline) / (1.0 - baseline))
             
             # Use tanh to scale the similarity in [0, 1]
-            weight = float(torch.tanh(torch.tensor(raw_weight * 2.0 * intensity)))
+            weight = float(torch.tanh(torch.tensor(raw_weight * intensity)))
 
             weights_dict[attr] = round(weight, 2)
 
