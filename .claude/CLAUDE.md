@@ -28,6 +28,7 @@ Core participant logic resides in `app/participant/`:
 * **Frontend:** React + Vite (Apps SDK widget).
 * **Storage:** SQLite (auto-generated from `raw_data/*.csv`).
 * **Orchestration:** Logic flow is managed in `app/harness/search_service.py`.
+* **components:** the different components of the pipeline are contained in `app/participant/components`. At the top there is the build function, then the abstract interface, and eventually all the concrete implementation.
 
 ## Environment Variables
 ```bash
