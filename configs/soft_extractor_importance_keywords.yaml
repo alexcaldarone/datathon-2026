@@ -1,27 +1,35 @@
-1.0:
-  - must
-  - essential
-  - needs
-  - required
-  - mandatory
-  - unbedingt
-  - muss
-  - notwendig
-  - zwingend
-0.7:
-  - prefer
-  - looking for
-  - searching
-  - like to have
-  - bevorzugt
-  - wäre toll
-  - suche
-  - hät gärn
-0.4:
-  - ideally
-  - maybe
-  - possible
-  - nice to have
-  - wenn möglich
-  - vielleicht
-  - wär schön
+# Multiplier applied to the final weight magnitude (always >= 1.0 to amplify strong signals)
+amplify:
+  1.5:
+    - must
+    - essential
+    - absolutely
+    - critical
+    - very important
+    - top priority
+    - unbedingt
+    - muss
+    - zwingend
+    - sehr wichtig
+    - absolut notwendig
+  1.2:
+    - prefer
+    - looking for
+    - ideally
+    - would love
+    - searching for
+    - bevorzugt
+    - wäre toll
+    - suche
+    - hät gärn
+    - wichtig
+  0.7:
+    - maybe
+    - nice to have
+    - possibly
+    - if possible
+    - would be a bonus
+    - wenn möglich
+    - vielleicht
+    - wär schön
+    - optional
