@@ -4,6 +4,8 @@ from abc import abstractmethod, ABC
 from typing import Any
 import json
 from sentence_transformers import SentenceTransformer, util
+import yaml
+import os
 import torch
 from app.models.schemas import SoftFactWeights
 
@@ -26,7 +28,7 @@ class SoftFactExtractor(ABC):
     def run(self, query: str) -> dict[str, Any]:
         pass
 
-class LLMSoftFactExtractor(SoftFactExtractor):
+class LLMSoftExtractor(SoftFactExtractor):
     """
     Uses an LLM to parse the natural language query and map it to feature weights.
     """
@@ -36,9 +38,9 @@ class LLMSoftFactExtractor(SoftFactExtractor):
         super().__init__(cfg)
         self.results = {}
         self.weights = SoftFactWeights()
-        if LLMSoftFactExtractor._model is None:
+        if LLMSoftExtractor._model is None:
             # Load the multilingual model requested by the user
-            LLMSoftFactExtractor._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            LLMSoftExtractor._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         
         # Define extensive semantic "anchors" for generalization
         self.anchors = {
@@ -110,6 +112,7 @@ class LLMSoftFactExtractor(SoftFactExtractor):
             0.4: ["ideally", "maybe", "possible", "nice to have", "wenn möglich", "vielleicht", "wär schön"]
         }
 
+    # Prompt (not used)
     def _get_system_prompt(self) -> str:
         return """
         You are an expert real estate analyzer. Given a user query, extract the importance of various 'soft' attributes.
@@ -176,6 +179,7 @@ class LLMSoftFactExtractor(SoftFactExtractor):
         self.get_weights(query)
         return []
 
+# ???
 class Property():
     def __init__(self, id: str, info: dict):
         self.id = id
