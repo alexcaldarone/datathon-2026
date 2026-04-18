@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.models.schemas import RankedListingResult
-from app.participant.components import build_ranker, Config
+from app.participant.components import build_reranker, Config
 
 def rank_listings(
     candidates: list[dict[str, Any]],
@@ -11,6 +11,6 @@ def rank_listings(
 ) -> list[RankedListingResult]:
 
     cfg = Config.get_cfg()
-    ranker = build_ranker(cfg)
+    reranker = build_reranker(cfg)
 
-    return ranker.run(candidates, soft_facts)
+    return reranker.run(candidates, soft_facts)

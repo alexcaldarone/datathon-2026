@@ -8,7 +8,7 @@ import yaml
 from omegaconf import DictConfig, OmegaConf
 
 from app.ingestion.components.client import OpenSearchClient
-from app.ingestion.components.augmenters import build_augmenters
+from app.ingestion.components.augmenters import build_augmenters, ImageEmbeddingAugmenter
 from app.participant.components.utils import _instantiate
 
 _MODULE = "app.participant.components.soft_filter"
@@ -51,6 +51,10 @@ class HybridSimilarityFilter(SoftFilter):
         self._pipeline = ingestion_cfg.pipeline_name
         self._augmenters = build_augmenters(ingestion_cfg)
         self._client = OpenSearchClient()  # singleton — not rebuilt per request
+        # optional image augmenter for multimodal query embedding
+        self._image_augmenter: ImageEmbeddingAugmenter | None = None
+        if ingestion_cfg.get("enable_image_embeddings", False):
+            self._image_augmenter = ImageEmbeddingAugmenter(ingestion_cfg)
 
     def run(
         self,
@@ -66,6 +70,13 @@ class HybridSimilarityFilter(SoftFilter):
         query_listing = {"full_text": query_text}
         features = {aug.field_name: aug.augment(query_listing).content for aug in self._augmenters}
 
+        # embed query text in multimodal space for image kNN (if enabled)
+        image_vector: list[float] | None = None
+        if self._image_augmenter:
+            image_vector = self._image_augmenter._embed_text(query_text)
+
+        boost_fields: list[str] = soft_facts.get("boost_fields", [])
+
         resp = self._client.search(
             index=self._index,
             body=self._build_query(
@@ -73,6 +84,8 @@ class HybridSimilarityFilter(SoftFilter):
                 dense_vector=features.get("dense_embedding", []),
                 sparse_weights=features.get("sparse_embedding", {}),
                 listing_ids=listing_ids,
+                image_vector=image_vector,
+                boost_fields=boost_fields,
             ),
             pipeline=self._pipeline,
         )
@@ -92,6 +105,8 @@ class HybridSimilarityFilter(SoftFilter):
         dense_vector: list[float],
         sparse_weights: dict[str, float],
         listing_ids: list[str],
+        image_vector: list[float] | None = None,
+        boost_fields: list[str] | None = None,
     ) -> dict:
         n = len(listing_ids)
         top_k = int(self.cfg.top_k)
@@ -106,37 +121,68 @@ class HybridSimilarityFilter(SoftFilter):
             }
         }
 
-        return {
-            # size=n ensures the hybrid+RRF stage sees all candidates before post_filter trims
-            "size": n,
-            "query": {
-                "hybrid": {
-                    "queries": [
-                        {
-                            "bool": {
-                                "must": {
-                                    "multi_match": {
-                                        "query": query_text,
-                                        "fields": ["full_text", "title", "description"],
-                                    }
-                                },
-                                "filter": candidate_filter,
-                            }
-                        },
-                        {
-                            "knn": {
-                                "dense_embedding": {
-                                    "vector": dense_vector,
-                                    "k": n,
-                                    "filter": candidate_filter,
-                                }
-                            }
-                        },
-                        sparse_query,
-                    ]
+        hybrid_queries = [
+            {
+                "bool": {
+                    "must": {
+                        "multi_match": {
+                            "query": query_text,
+                            "fields": ["full_text", "title", "description", "full_text_en"],
+                        }
+                    },
+                    "filter": candidate_filter,
                 }
             },
-            # post_filter as safety net in case any non-candidate slips through
+            {
+                # knn filter inside hybrid silently returns 0 hits — post_filter restricts instead
+                "knn": {
+                    "dense_embedding": {
+                        "vector": dense_vector,
+                        # k=n covers the full candidate neighborhood before post_filter
+                        "k": n,
+                    }
+                }
+            },
+            sparse_query,
+        ]
+
+        # add image kNN sub-query when multimodal embeddings are available
+        if image_vector:
+            hybrid_queries.append({
+                "knn": {
+                    "image_embedding": {
+                        "vector": image_vector,
+                        "k": n,
+                    }
+                }
+            })
+
+        # add function_score boosts for VLM / geo feature fields
+        if boost_fields:
+            functions = [
+                {
+                    "field_value_factor": {
+                        "field": field,
+                        "modifier": "log1p",
+                        "missing": 5,
+                    }
+                }
+                for field in boost_fields
+            ]
+            hybrid_queries.append({
+                "function_score": {
+                    "query": {"bool": {"filter": candidate_filter}},
+                    "functions": functions,
+                    "boost_mode": "multiply",
+                    "score_mode": "sum",
+                }
+            })
+
+        return {
+            # return top_k; post_filter guarantees results come from the candidate set
+            "size": top_k,
+            "query": {"hybrid": {"queries": hybrid_queries}},
+            # restrict final results to the hard-filtered candidate set
             "post_filter": candidate_filter,
         }
 
