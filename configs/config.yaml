@@ -16,7 +16,10 @@ soft_extractor:
 
 soft_filter:
   class_name: HybridSimilarityFilter
-  top_k: 10
+  top_k: 20
 
-ranker:
-  class_name: DumbRanker
+reranker:
+  class_name: CohereReRanker
+  model_id: "cohere.rerank-v3-5:0"
+  top_n: 10
+  region: "us-east-1"
