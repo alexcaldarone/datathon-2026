@@ -1,0 +1,11 @@
+hard_extractor:
+  class_name: DumbHardExtractor
+
+soft_extractor:
+  class_name: DumbSoftExtractor
+
+soft_filter:
+  class_name: DumbSoftFilter
+
+ranker:
+  class_name: DumbRanker
