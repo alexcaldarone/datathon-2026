@@ -1,6 +1,16 @@
 embed_dim: 1024
 embed_workers: 8
 model_id: "amazon.titan-embed-text-v2:0"
+image_model_id: "amazon.titan-embed-image-v1"
+vlm_model_id: "anthropic.claude-3-haiku-20240307-v1:0"
+translation_model_id: "anthropic.claude-3-haiku-20240307-v1:0"
+overpass_url: "https://overpass.private.coffee/api/interpreter"
+overpass_workers: 20
+
+enable_image_embeddings: true
+enable_vlm_features: true
+enable_translation: true
+enable_geo_features: true
 
 index_name: "listings"
 pipeline_name: "hybrid-rrf-pipeline"

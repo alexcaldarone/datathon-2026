@@ -12,7 +12,8 @@ from app.ingestion.components.utils import parse_features, row_to_full_text
 _QUERY = """
     SELECT listing_id, title, description, city, canton, postal_code,
            offer_type, object_category, object_type, price, rooms, area,
-           latitude, longitude, available_from, features_json
+           latitude, longitude, available_from, features_json,
+           hero_image_url, images_json
     FROM listings LIMIT ? OFFSET ?
 """
 
