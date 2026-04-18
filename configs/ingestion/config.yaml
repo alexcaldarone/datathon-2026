@@ -9,10 +9,10 @@ overpass_workers: 5
 
 enable_image_embeddings: true
 enable_vlm_features: true
-enable_translation: false
+enable_translation: true
 enable_geo_features: true
 
-index_name: "listings-test-augmenters"
+index_name: "listings"
 pipeline_name: "hybrid-rrf-pipeline"
 rrf_rank_constant: 60
 default_batch: 10

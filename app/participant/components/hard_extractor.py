@@ -42,8 +42,8 @@ class LLMHardFactExtractor(HardFactExtractor):
             output_type=HardFilters,
         )
 
-    async def run(self, query: str) -> HardFilters:
-        result = await self._agent.run(query)
+    def run(self, query: str) -> HardFilters:
+        result = self._agent.run_sync(query)
         return result.output
 
 class DumbHardExtractor(HardFactExtractor):
