@@ -23,6 +23,17 @@ class OpenSearchClient:
         params = {"search_pipeline": pipeline} if pipeline else {}
         return self._client.search(index=index, body=body, params=params)
 
+    def fetch_existing(self, index: str, ids: list[str], fields: list[str]) -> dict[str, dict]:
+        if not ids or not self._client.indices.exists(index=index):
+            return {}
+        body = {
+            "query": {"ids": {"values": ids}},
+            "_source": fields,
+            "size": len(ids),
+        }
+        resp = self._client.search(index=index, body=body)
+        return {hit["_id"]: hit["_source"] for hit in resp["hits"]["hits"]}
+
     # --- ingestion ---
 
     def setup(

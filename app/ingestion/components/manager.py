@@ -17,6 +17,10 @@ _QUERY = """
 """
 
 
+def _is_complete(doc: dict, fields: list[str]) -> bool:
+    return all(doc.get(f) not in (None, {}, [], "") for f in fields)
+
+
 class IngestionManager:
     def __init__(self, cfg: DictConfig, augmenters: list[Augmenter], client: OpenSearchClient):
         self.cfg = cfg
@@ -50,7 +54,8 @@ class IngestionManager:
         if limit:
             total = min(total, limit)
 
-        indexed = failed = offset = 0
+        augmenter_fields = [aug.field_name for aug in self.augmenters]
+        indexed = failed = skipped = offset = 0
         batch_size = int(self.cfg.default_batch)
 
         with tqdm(total=total, unit="doc", desc="Ingesting") as bar:
@@ -60,26 +65,36 @@ class IngestionManager:
                 if not rows:
                     break
 
-                # pre-build full_text once so every augmenter can use it
-                listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in rows]
+                # check which docs already have all augmenter fields populated
+                ids = [row["listing_id"] for row in rows]
+                existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
+                new_rows = [
+                    row for row in rows
+                    if not _is_complete(existing.get(row["listing_id"], {}), augmenter_fields)
+                ]
+                skipped += len(rows) - len(new_rows)
 
-                # download images once for the whole batch
-                download_images_batch(listings, max_workers=int(self.cfg.get("embed_workers", 8)))
+                if new_rows:
+                    listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
 
-                augmented: dict[str, list] = {}
-                for aug in self.augmenters:
-                    features = aug.augment_batch(listings)
-                    augmented[aug.field_name] = [f.content for f in features]
+                    # download images once for the whole batch
+                    download_images_batch(listings, max_workers=int(self.cfg.get("embed_workers", 8)))
 
-                docs = self._build_docs(rows, listings, augmented)
-                ok, err = self.client.bulk_upsert(docs)
-                indexed += ok
-                failed += err
+                    augmented: dict[str, list] = {}
+                    for aug in self.augmenters:
+                        features = aug.augment_batch(listings)
+                        augmented[aug.field_name] = [f.content for f in features]
+
+                    docs = self._build_docs(new_rows, listings, augmented)
+                    ok, err = self.client.bulk_upsert(docs)
+                    indexed += ok
+                    failed += err
+
                 offset += len(rows)
                 bar.update(len(rows))
 
         conn.close()
-        print(f"\nDone. Indexed: {indexed} | Failed: {failed}")
+        print(f"\nDone. Indexed: {indexed} | Skipped: {skipped} | Failed: {failed}")
 
     def _build_docs(
         self,
