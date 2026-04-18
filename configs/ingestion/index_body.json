@@ -23,7 +23,8 @@
       "latitude":        { "type": "float" },
       "longitude":       { "type": "float" },
       "available_from":  { "type": "keyword" },
-      "features":        { "type": "keyword" }
+      "features":        { "type": "keyword" },
+      "images_urls":      { "type": "keyword" }
     }
   }
 }

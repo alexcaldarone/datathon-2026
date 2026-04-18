@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from app.ingestion.components.augmenters import Augmenter
 from app.ingestion.components.client import OpenSearchClient
-from app.ingestion.components.utils import parse_features, row_to_full_text
+from app.ingestion.components.utils import parse_features, row_to_full_text, parse_images_json
 
 def _is_complete(source: dict, fields: list[str]) -> bool:
     return all(source.get(f) for f in fields)
@@ -16,7 +16,7 @@ def _is_complete(source: dict, fields: list[str]) -> bool:
 _QUERY = """
     SELECT listing_id, title, description, city, canton, postal_code,
            offer_type, object_category, object_type, price, rooms, area,
-           latitude, longitude, available_from, features_json
+           latitude, longitude, available_from, features_json, images_json
     FROM listings LIMIT ? OFFSET ?
 """
 
@@ -126,6 +126,7 @@ class IngestionManager:
                 "latitude":        row["latitude"],
                 "longitude":       row["longitude"],
                 "available_from":  row["available_from"],
+                "images_urls":     parse_images_json(row["images_json"]),
                 "features":        parse_features(row["features_json"]),
             }
             for field_name, contents in augmented.items():

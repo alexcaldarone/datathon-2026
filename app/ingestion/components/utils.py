@@ -14,3 +14,12 @@ def parse_features(features_json: str | None) -> list[str]:
         return json.loads(features_json)
     except (json.JSONDecodeError, TypeError):
         return []
+
+def parse_images_json(images_json: str):
+    if not images_json:
+        return []
+    try:
+        images = json.loads(images_json)
+        return [i["url"] for i in images["images"]]
+    except (json.JSONDecodeError, TypeError):
+        return []
