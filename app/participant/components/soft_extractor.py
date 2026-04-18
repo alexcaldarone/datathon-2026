@@ -58,21 +58,27 @@ class LLMSoftExtractor(SoftFactExtractor):
         else:
             self.importance_keywords = {}
 
-        # Pre-compute anchor embeddings
+        # Pre-compute anchor embeddings for positive and negative phrase sets
         self.anchor_embeddings = {
-            attr: self._model.encode(phrases, convert_to_tensor=True) 
-            for attr, phrases in self.anchors.items()
+            attr: {
+                side: self._model.encode(phrases, convert_to_tensor=True)
+                for side, phrases in sides.items()
+                if isinstance(phrases, list) and phrases
+            }
+            for attr, sides in self.anchors.items()
         }
 
     # Prompt (not used)
     def _get_system_prompt(self) -> str:
         return """
         You are an expert real estate analyzer. Given a user query, extract the importance of various 'soft' attributes.
-        Assign a weight between 0.0 and 1.0 for each attribute.
+        Assign a weight between -1.0 and 1.0 for each attribute.
         - 1.0: Essential / Must have / Explicitly mentioned as a priority.
         - 0.7: Strong preference / Looking for...
         - 0.4: Mentioned but not critical / "Nice to have".
         - 0.0: Not mentioned.
+        - -0.5: Avoid / Prefer not to have.
+        - -1.0: Strictly avoid / Must not have.
 
         Attributes to score:
         - daylight_score: Brightness, sunny, large windows.
@@ -92,37 +98,33 @@ class LLMSoftExtractor(SoftFactExtractor):
         """
 
     def get_weights(self, query: str) -> SoftFactWeights:
-        """
-        Extracts weights using combined semantic similarity and intensity keyword analysis.
-        Initial semantic match is refined by importance keywords (must, prefer, ideally).
-        """
         query_embedding = self._model.encode(query, convert_to_tensor=True)
         q_lower = query.lower()
         weights_dict = {}
 
-        # Identify global importance context
-        global_intensity = 0.5 # Default to moderate interest
-        for val, keywords in self.importance_keywords.items():
+        # Intensity multiplier: 1.0 for neutral queries, > 1.0 when strong importance
+        # keywords are detected (e.g. "must", "essential"). Never flips sign.
+        intensity = 1.0
+        for val, keywords in self.importance_keywords.get("amplify", {}).items():
             if any(k in q_lower for k in keywords):
-                global_intensity = max(global_intensity, val)
+                intensity = max(intensity, float(val))
 
-        for attr, embeddings in self.anchor_embeddings.items():
-            # 1. Compute semantic similarity to anchors
-            cos_sims = util.cos_sim(query_embedding, embeddings)
-            max_sim = float(torch.max(cos_sims))
-            
-            # 2. Thresholding: only proceed if there is a semi-strong semantic match (> 0.45)
-            if max_sim > 0.45:
-                # Semantic strength scaled to [0, 1]
-                semantic_strength = (max_sim - 0.45) / 0.45 
-                
-                # Hybrid weighting: combine semantic match with explicitly detected keyword intensity
-                # We give slightly more weight (60%) to the keyword intensity if detected
-                final_weight = (semantic_strength * 0.4) + (global_intensity * 0.6)
-                
-                # Minimum threshold for final weight to avoid noise
-                if final_weight > 0.3:
-                    weights_dict[attr] = round(min(1.0, final_weight), 2)
+        for attr, sides in self.anchor_embeddings.items():
+            pos_embeddings = sides.get("positive")
+            neg_embeddings = sides.get("negative")
+
+            max_pos_sim = float(torch.max(util.cos_sim(query_embedding, pos_embeddings))) if pos_embeddings is not None else 0.0
+            max_neg_sim = float(torch.max(util.cos_sim(query_embedding, neg_embeddings))) if neg_embeddings is not None else 0.0
+
+            # Raw directional score: positive → user wants attribute high,
+            # negative → user wants attribute low. Unrelated queries produce
+            # similar pos/neg sims so the difference stays near 0.
+            raw = max_pos_sim - max_neg_sim
+
+            # Amplify by intensity, then clamp strictly to [-1, 1]
+            weight = min(1.0, max(-1.0, raw * intensity))
+
+            weights_dict[attr] = round(weight, 2)
 
         self.weights = SoftFactWeights(**weights_dict)
         return self.weights
@@ -146,6 +148,13 @@ class LLMSoftExtractor(SoftFactExtractor):
                 if required_weight > 0:
                     building_weight = building_weights_dict.get(attr, 0)
                     if building_weight < (required_weight * indicator):
+                        included = False
+                        break
+                elif required_weight < 0:
+                    building_weight = building_weights_dict.get(attr, 0)
+                    # For negative weights, we want building_weight to be low
+                    # If required_weight = -1.0, building_weight must be < (1.0 - 0.8) = 0.2
+                    if building_weight > (1.0 + required_weight * indicator):
                         included = False
                         break
             
