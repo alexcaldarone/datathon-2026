@@ -86,14 +86,11 @@ Other important rules to respect:
 """
 
 class LLMHardFactExtractor(HardFactExtractor):
-    def __init__(self, model_id: str | None = None):
+    def __init__(self):
         super().__init__()
-        bedrock_model = model_id or os.getenv(
-            "BEDROCK_MODEL_ID",
-            "anthropic.claude-3-haiku-20240307-v1:0",
-        )
+        model_id = self.cfg.model_id
         self._agent = Agent(
-            f"bedrock:{bedrock_model}",
+            f"bedrock:{model_id}",
             system_prompt=HARD_EXTRACTION_SYSTEM_PROMPT,
             output_type=HardFilters,
         )

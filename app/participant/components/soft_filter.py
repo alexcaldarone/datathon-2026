@@ -60,7 +60,8 @@ class HybridSimilarityFilter(SoftFilter):
         query_text: str = soft_facts.get("_query", "")
         if not query_text or not candidates:
             return candidates
-
+        # candidates=[{"listing_id":"695fdc5dc12a1d2f41553111"}]
+        # soft_facts={"_query":"house in zurich"}
         listing_ids = [c["listing_id"] for c in candidates]
         query_listing = {"full_text": query_text}
         features = {aug.field_name: aug.augment(query_listing).content for aug in self._augmenters}
@@ -76,7 +77,14 @@ class HybridSimilarityFilter(SoftFilter):
             pipeline=self._pipeline,
         )
 
-        return [hit["_source"] for hit in resp["hits"]["hits"]]
+        hits = resp["hits"]["hits"]
+        top_k = int(self.cfg.top_k)
+        
+        padding = []
+        if len(hits) < top_k:
+            padding = candidates[:top_k-len(hits)]
+
+        return [hit["_source"] for hit in hits][:top_k] + padding
 
     def _build_query(
         self,
@@ -99,8 +107,8 @@ class HybridSimilarityFilter(SoftFilter):
         }
 
         return {
-            # return top_k; post_filter guarantees results come from the candidate set
-            "size": top_k,
+            # size=n ensures the hybrid+RRF stage sees all candidates before post_filter trims
+            "size": n,
             "query": {
                 "hybrid": {
                     "queries": [
@@ -116,12 +124,11 @@ class HybridSimilarityFilter(SoftFilter):
                             }
                         },
                         {
-                            # knn filter inside hybrid silently returns 0 hits — post_filter restricts instead
                             "knn": {
                                 "dense_embedding": {
                                     "vector": dense_vector,
-                                    # k=n covers the full candidate neighborhood before post_filter
                                     "k": n,
+                                    "filter": candidate_filter,
                                 }
                             }
                         },
@@ -129,7 +136,7 @@ class HybridSimilarityFilter(SoftFilter):
                     ]
                 }
             },
-            # restrict final results to the hard-filtered candidate set
+            # post_filter as safety net in case any non-candidate slips through
             "post_filter": candidate_filter,
         }
 

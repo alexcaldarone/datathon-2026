@@ -9,6 +9,10 @@ from app.ingestion.components.augmenters import Augmenter
 from app.ingestion.components.client import OpenSearchClient
 from app.ingestion.components.utils import parse_features, row_to_full_text
 
+def _is_complete(source: dict, fields: list[str]) -> bool:
+    return all(source.get(f) for f in fields)
+
+
 _QUERY = """
     SELECT listing_id, title, description, city, canton, postal_code,
            offer_type, object_category, object_type, price, rooms, area,
@@ -50,7 +54,8 @@ class IngestionManager:
         if limit:
             total = min(total, limit)
 
-        indexed = failed = offset = 0
+        augmenter_fields = [aug.field_name for aug in self.augmenters]
+        indexed = failed = skipped = offset = 0
         batch_size = int(self.cfg.default_batch)
 
         with tqdm(total=total, unit="doc", desc="Ingesting") as bar:
@@ -60,23 +65,39 @@ class IngestionManager:
                 if not rows:
                     break
 
-                # pre-build full_text once so every augmenter can use it
-                listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in rows]
+                # check which docs already have all augmenter fields populated
+                ids = [row["listing_id"] for row in rows]
+                existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
+                new_rows = [
+                    row for row in rows
+                    if not _is_complete(existing.get(row["listing_id"], {}), augmenter_fields)
+                ]
+                skipped += len(rows) - len(new_rows)
 
-                augmented: dict[str, list] = {}
-                for aug in self.augmenters:
-                    features = aug.augment_batch(listings)
-                    augmented[aug.field_name] = [f.content for f in features]
+                if new_rows:
+                    listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
+                    augmented: dict[str, list] = {}
+                    for aug in self.augmenters:
+                        features = aug.augment_batch(listings)
+                        augmented[aug.field_name] = [f.content for f in features]
 
-                docs = self._build_docs(rows, listings, augmented)
-                ok, err = self.client.bulk_upsert(docs)
-                indexed += ok
-                failed += err
+                    docs = self._build_docs(new_rows, listings, augmented)
+                    ok, err = self.client.bulk_upsert(docs)
+                    indexed += ok
+                    failed += err
+
                 offset += len(rows)
                 bar.update(len(rows))
 
         conn.close()
-        print(f"\nDone. Indexed: {indexed} | Failed: {failed}")
+        print(
+            f"\n{'─' * 40}\n"
+            f"  Indexed : {indexed}\n"
+            f"  Skipped : {skipped}  (already complete)\n"
+            f"  Failed  : {failed}\n"
+            f"  Total   : {indexed + skipped + failed}\n"
+            f"{'─' * 40}"
+        )
 
     def _build_docs(
         self,
