@@ -71,7 +71,13 @@ def build_tool_descriptor() -> types.Tool:
     return types.Tool(
         name=SEARCH_TOOL_NAME,
         title="Search listings",
-        description="Search Swiss real-estate listings from the harness and render a ranked list with map pins.",
+        description=(
+            "Search Swiss real-estate listings and render a ranked list with map pins. "
+            "If the query is too vague, returns clarification questions in the meta field instead of listings. "
+            "When you receive clarification questions, ask the user those questions, "
+            "then call this tool again with a single query that combines the user's "
+            "original preferences with their new answers."
+        ),
         inputSchema=SearchListingsInput.model_json_schema(),
         annotations=types.ToolAnnotations(
             readOnlyHint=True,
@@ -87,6 +93,15 @@ def build_search_tool_result(
     query: str,
     payload: dict[str, Any],
 ) -> types.CallToolResult:
+    meta = payload.get("meta", {})
+    if meta.get("status") == "clarification_needed":
+        questions = meta.get("questions", [])
+        reason = meta.get("reason", "")
+        text = f"Need more details: {reason}\n" + "\n".join(f"- {q}" for q in questions)
+        return types.CallToolResult(
+            content=[types.TextContent(type="text", text=text)],
+            structuredContent=payload,
+        )
     count = len(payload.get("listings", []))
     summary = f"Showing {count} listing{'s' if count != 1 else ''} for “{query}”."
     return types.CallToolResult(
