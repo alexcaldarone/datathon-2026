@@ -42,74 +42,26 @@ class LLMSoftExtractor(SoftFactExtractor):
             # Load the multilingual model requested by the user
             LLMSoftExtractor._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         
-        # Define extensive semantic "anchors" for generalization
-        self.anchors = {
-            "daylight_score": [
-                "bright apartment with sun", "natural light", "floor to ceiling windows", "sunny balcony",
-                "Helle Wohnung mit viel Sonne", "lichtdurchflutet", "direkte Sonneneinstrahlung", "grosse Fenster",
-                "vül sunne am Nomittag", "helli Zimmer", "sunnig und schön"
-            ],
-            "noise_level": [
-                "quiet area away from traffic", "peaceful residential neighborhood", "soundproof windows", "calm environment",
-                "Ruhiges Quartier ohne Strassenlärm", "schalldichte Fenster", "keine Fluglärm", "seriöse ruhige Lage",
-                "ganz ruhig", "kei Lärm idä Nacht", "stilli Umgäbig"
-            ],
-            "view_quality_score": [
-                "apartment with a view", "panoramic mountain view", "lake view from rooftop", "stunning city skyline",
-                "Wohnung mit schöner Aussicht", "Seesicht", "Bergblick", "Weitblick über die Stadt",
-                "super Ussicht uf d Alpe", "Zürisee Blick", "mer gseht d Berge"
-            ],
-            "green_view_ratio": [
-                "near nature and parks", "overlooking a garden", "green surroundings", "forest nearby",
-                "In der Nähe von Parks und Grünflächen", "Gartenanteil", "Blick ins Grüne", "Naturnah",
-                "nöch a dr Natur", "mer gseht Bäum und Gras", "bi de Allemände"
-            ],
-            "walkability_score": [
-                "close to shops and groceries", "central location near amenities", "walkable distance to pharmacy",
-                "Einkaufsmöglichkeiten zu Fuss erreichbar", "zentrale Lage", "Migros Coop in der Nähe",
-                "Gute Inchauschance", "mer cha alles z Fuäss mache", "nöch bim Coop"
-            ],
-            "public_transport_score": [
-                "near public transport tram train", "good connection to city center", "short walk to station",
-                "Gute Anbindung an ÖV", "Bahnhof in der Nähe", "Tramhaltestelle vor der Tür",
-                "nöch bi de Tramstation", "S-Bahn Aaschluss", "gueti Verbindig"
-            ],
-            "interior_modernity": [
-                "modern high-end interior", "newly renovated finishings", "dishwasher and washing machine", "luxury kitchen",
-                "Moderne hochwertige Innenausstattung", "Erstbezug nach Sanierung", "Geschirrspüler vorhanden",
-                "modärni Chuchi", "alles neu renoviert", "luxuriösi Usstattig", "Abwäschmaschine"
-            ],
-            "work_from_home_fitness": [
-                "home office with high speed internet", "quiet for focused work", "fiber optic connection",
-                "Idealer Arbeitsplatz für Home Office", "Glasfaseranschluss", "schnelles Internet",
-                "home office tauglich", "guets WLAN", "schnells Netz"
-            ],
-            "spaciousness_perception": [
-                "large rooms high ceilings", "generous floor plan", "airy atmosphere", "open living surface",
-                "Grosszügige Zimmer", "hohe Decken", "offener Grundriss", "viel Platz",
-                "groissi Zimmer", "luftig", "grosszuegigs Wohnzimmer"
-            ],
-            "neighborhood_safety_score": [
-                "safe family friendly area", "kids playing outside", "low crime neighborhood", "schools and kindergartens nearby",
-                "Sicheres familienfreundliches Wohnquartier", "verkehrsberuhigte Zone", "Schule in der Nähe",
-                "guet für Chind", "sicher zum Spiele", "familiefründlich"
-            ],
-            "proximity_to_desired_location_score": [
-                "close to specific destination", "near university", "walking distance to workplace", "15 minutes from city center",
-                "In der Nähe vom Zielort", "kurzer Arbeitsweg", "Uni Nähe",
-                "nöch bi de Arbet", "schnäll bi de Uni", "öppe 10 minete vo de Stadt"
-            ]
-        }
+        # Load semantic "anchors" from YAML
+        anchor_path = getattr(self.cfg, "anchor_path", "configs/soft_extractor_anchors.yaml")
+        if os.path.exists(anchor_path):
+            with open(anchor_path, "r", encoding="utf-8") as f:
+                self.anchors = yaml.safe_load(f)
+        else:
+            self.anchors = {}
+
+        # Load importance keywords from YAML
+        keywords_path = getattr(self.cfg, "importance_keywords_path", "configs/soft_extractor_importance_keywords.yaml")
+        if os.path.exists(keywords_path):
+            with open(keywords_path, "r", encoding="utf-8") as f:
+                self.importance_keywords = yaml.safe_load(f)
+        else:
+            self.importance_keywords = {}
+
         # Pre-compute anchor embeddings
         self.anchor_embeddings = {
             attr: self._model.encode(phrases, convert_to_tensor=True) 
             for attr, phrases in self.anchors.items()
-        }
-
-        self.importance_keywords = {
-            1.0: ["must", "essential", "needs", "required", "mandatory", "unbedingt", "muss", "notwendig", "zwingend"],
-            0.7: ["prefer", "looking for", "searching", "like to have", "bevorzugt", "wäre toll", "suche", "hät gärn"],
-            0.4: ["ideally", "maybe", "possible", "nice to have", "wenn möglich", "vielleicht", "wär schön"]
         }
 
     # Prompt (not used)
@@ -175,20 +127,29 @@ class LLMSoftExtractor(SoftFactExtractor):
         self.weights = SoftFactWeights(**weights_dict)
         return self.weights
 
+    def weights_to_vector(self, weights: SoftFactWeights) -> list[float]:
+        return list(weights.model_dump().values())
+
     def run(self, query: str) -> list[dict[str, Any]]:
-        self.get_weights(query)
-        
+        extracted_weights = self.get_weights(query)
         self.results = []
 
-        indicator = 1 # between 0 and 1
+        # Indicator can be tuned to be more or less restrictive
+        indicator = 0.8 
 
-        for building in self.building:
+        for building in getattr(self, "buildings", []):
             included = True
-            for attr, weight in building.weights.model_dump().items():
-                if(weight < self.weights.attr * indicator):
-                    included = False
-                    break
-            if(included):
+            building_weights_dict = building.weights.model_dump()
+            query_weights_dict = extracted_weights.model_dump()
+
+            for attr, required_weight in query_weights_dict.items():
+                if required_weight > 0:
+                    building_weight = building_weights_dict.get(attr, 0)
+                    if building_weight < (required_weight * indicator):
+                        included = False
+                        break
+            
+            if included:
                 self.results.append({
                     "id": building.id,
                     "info": building.info,
