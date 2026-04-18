@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from app.ingestion.components.augmenters import Augmenter
 from app.ingestion.components.client import OpenSearchClient
-from app.ingestion.components.utils import parse_features, row_to_full_text, parse_images_json
+from app.ingestion.components.utils import parse_features, row_to_full_text, parse_images_json, download_images_batch
 
 def _is_complete(source: dict, fields: list[str]) -> bool:
     return all(source.get(f) for f in fields)
@@ -82,7 +82,7 @@ class IngestionManager:
                     listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
 
                     # download images once for the whole batch
-                    download_images_batch(listings, max_workers=int(self.cfg.get("embed_workers", 8)))
+                    download_images_batch(listings, max_workers=int(self.cfg.get("image_download_workers", 8)), request_timeout_s=self.cfg.image_request_timeout_s)
 
                     augmented: dict[str, list] = {}
                     for aug in self.augmenters:

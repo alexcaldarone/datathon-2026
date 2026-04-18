@@ -6,9 +6,6 @@ from pathlib import Path
 import requests
 
 
-_REQUEST_TIMEOUT: int = 10
-
-
 def row_to_full_text(row: sqlite3.Row) -> str:
     parts = [row["title"], row["description"], row["city"], row["canton"], row["object_category"]]
     return " ".join(p for p in parts if p)
@@ -23,21 +20,21 @@ def parse_features(features_json: str | None) -> list[str]:
         return []
 
 
-def fetch_hero_image(listing: dict) -> bytes | None:
+def fetch_hero_image(listing: dict, request_timeout_s: int) -> bytes | None:
     url = listing.get("hero_image_url")
     if not url:
         images_json = listing.get("images_json")
         url = _first_url_from_json(images_json)
     if not url:
         return None
-    return _download_image(url)
+    return _download_image(url, request_timeout_s)
 
 
-def _download_image(url: str) -> bytes | None:
+def _download_image(url: str, request_timeout_s: int) -> bytes | None:
     if url.startswith("/"):
         return _read_local_image(url)
     try:
-        resp = requests.get(url, timeout=_REQUEST_TIMEOUT)
+        resp = requests.get(url, timeout=request_timeout_s)
         resp.raise_for_status()
         return resp.content
     except Exception as exc:
@@ -69,12 +66,12 @@ def _first_url_from_json(images_json: str | None) -> str | None:
         return str(parsed[0]) if parsed[0] else None
     return None
 
-def download_images_batch(listings: list[dict], max_workers: int = 8) -> None:
-    def _download_one(listing: dict) -> None:
-        listing["_image_bytes"] = fetch_hero_image(listing)
+def download_images_batch(listings: list[dict], max_workers: int = 8, request_timeout_s: int = 30) -> None:
+    def _download_one(listing: dict, request_timeout_s: int) -> None:
+        listing["_image_bytes"] = fetch_hero_image(listing, request_timeout_s)
 
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        list(pool.map(_download_one, listings))
+        list(pool.map(_download_one, listings, [request_timeout_s]*len(listings)))
 
 
 def parse_images_json(images_json: str):
