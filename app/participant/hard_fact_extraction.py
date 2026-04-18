@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from app.models.schemas import HardFilters
-from app.participant.components import build_hard_extractor, Config
+from app.participant.components.hard_extractor import LLMHardFactExtractor
+from app.participant.components import Config, build_hard_extractor
 
 
 def extract_hard_facts(query: str) -> HardFilters:

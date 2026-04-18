@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "similarity": {
+      "custom_bm25": { "type": "BM25", "b": 0.75, "k1": 1.2 }
+    },
+    "index": { "knn": true, "number_of_shards": 3, "number_of_replicas": 2 }
+  },
+  "mappings": {
+    "properties": {
+      "listing_id":      { "type": "keyword" },
+      "full_text":       { "type": "text", "analyzer": "standard", "similarity": "custom_bm25" },
+      "title":           { "type": "text", "similarity": "custom_bm25" },
+      "description":     { "type": "text", "similarity": "custom_bm25" },
+      "city":            { "type": "keyword" },
+      "canton":          { "type": "keyword" },
+      "postal_code":     { "type": "keyword" },
+      "offer_type":      { "type": "keyword" },
+      "object_category": { "type": "keyword" },
+      "object_type":     { "type": "keyword" },
+      "price":           { "type": "float" },
+      "rooms":           { "type": "float" },
+      "area":            { "type": "float" },
+      "latitude":        { "type": "float" },
+      "longitude":       { "type": "float" },
+      "available_from":  { "type": "keyword" },
+      "features":        { "type": "keyword" }
+    }
+  }
+}

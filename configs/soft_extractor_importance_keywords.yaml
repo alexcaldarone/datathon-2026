@@ -1,35 +1,82 @@
-# Multiplier applied to the final weight magnitude (always >= 1.0 to amplify strong signals)
 amplify:
   1.5:
-    - must
-    - essential
-    - absolutely
-    - critical
-    - very important
-    - top priority
-    - unbedingt
     - muss
+    - unbedingt
     - zwingend
-    - sehr wichtig
     - absolut notwendig
+    - auf jeden Fall
+    - essenziell
+    - dringend
+    - ist ein Muss
+    - das ist Pflicht
+    - unabdingbar
+    - Grundvoraussetzung
+    - ich bestehe darauf
+    - ohne das geht es nicht
+    - ohne das geht's nicht
+    - nicht verhandelbar
+    - das brauche ich unbedingt
+    - Mindestanforderung
+    - Voraussetzung
+    - ich lasse nicht davon ab
+    - absolut wichtig
+    - höchste Priorität
+    - ganz wichtig
+    - superwichtig
+    - megawichtig
+    - isch ein Muss für mich
+    - isch absolut notwendig
+    - ohni das gits nöd
+    - das isch mir extrem wichtig
+    - das will ich auf jeden Fall
+    - krass wichtig
   1.2:
-    - prefer
-    - looking for
-    - ideally
-    - would love
-    - searching for
     - bevorzugt
+    - am liebsten
     - wäre toll
+    - würde ich gerne
     - suche
+    - wünsche mir
+    - lieber
+    - hätte gerne
+    - wäre schön wenn
+    - ich lege Wert auf
+    - wichtig für mich
+    - wäre super
+    - sehr gerne
+    - stark bevorzugt
+    - wäre ideal
+    - idealerweise
+    - präferiere ich
+    - würde es vorziehen
+    - wäre mir wichtig
     - hät gärn
-    - wichtig
+    - wär toll wenn
+    - das wär schön
+    - würde mir gut gefallen
+    - ich steh drauf
+    - wär mir lieb
+    - ich finds wichtig
+    - sollte schon vorhanden sein
+    - wäre sehr angenehm
   0.7:
-    - maybe
-    - nice to have
-    - possibly
-    - if possible
-    - would be a bonus
+    - wäre nett
     - wenn möglich
     - vielleicht
-    - wär schön
     - optional
+    - wäre ein Bonus
+    - falls vorhanden
+    - wäre angenehm
+    - wäre praktisch
+    - nicht zwingend aber schön
+    - könnte gut sein
+    - wäre ein Plus
+    - nice to have
+    - wär halt schön
+    - wenn's geht
+    - wär a Bonus
+    - falls es geht
+    - wär praktisch
+    - nicht so wichtig aber schön
+    - wäre hilfreich
+    - wär fein

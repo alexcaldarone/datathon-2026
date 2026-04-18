@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
 from app.api.routes.listings import router as listings_router
 from app.config import get_settings
 from app.harness.bootstrap import bootstrap_database
 
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

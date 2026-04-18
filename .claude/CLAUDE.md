@@ -10,6 +10,8 @@ A minimal harness for a Datathon challenge focused on building a high-quality li
 * **Build Widget:** `cd apps_sdk/web && npm install && npm run build`
 * **Run Tests:** `uv run pytest tests -q`
 * **Docker:** `docker compose up --build`
+* **Ingest OpenSearch (dry run):** `OPENSEARCH_ENDPOINT=<host> uv run python scripts/ingest_opensearch.py --dry-run`
+* **Ingest OpenSearch (full):** `OPENSEARCH_ENDPOINT=<host> uv run python scripts/ingest_opensearch.py --reset`
 
 ## Extension Points (Edit These)
 Core participant logic resides in `app/participant/`:
