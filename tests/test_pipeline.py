@@ -1,4 +1,5 @@
-from app.models.schemas import HardFilters
+from app.models.schemas import HardFilters, ValidationResult
+from app.participant.components.query_validator import DumbQueryValidator
 from app.participant.hard_fact_extraction import extract_hard_facts
 from app.participant.ranking import rank_listings
 from app.participant.soft_fact_extraction import extract_soft_facts
@@ -26,6 +27,26 @@ def test_participant_soft_fact_modules_are_importable() -> None:
     assert ranked
     assert all(item.listing_id for item in ranked)
     assert all(isinstance(item.score, float) for item in ranked)
+
+
+def test_dumb_validator_always_valid() -> None:
+    from omegaconf import OmegaConf
+
+    cfg = OmegaConf.create({"class_name": "DumbQueryValidator"})
+    result = DumbQueryValidator(cfg).run("")
+
+    assert isinstance(result, ValidationResult)
+    assert result.is_valid is True
+
+
+def test_validate_query_returns_validation_result() -> None:
+    from omegaconf import OmegaConf
+
+    cfg = OmegaConf.create({"class_name": "DumbQueryValidator"})
+    result = DumbQueryValidator(cfg).run("3-room flat in Zurich")
+
+    assert isinstance(result, ValidationResult)
+    assert result.is_valid is True
 
 
 def test_harness_service_converts_hard_filters_to_search_params() -> None:

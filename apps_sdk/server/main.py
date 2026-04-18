@@ -73,7 +73,9 @@ def build_tool_descriptor() -> types.Tool:
         title="Search listings",
         description=(
             "Search Swiss real-estate listings and render a ranked list with map pins. "
-            "If the query is too vague, returns clarification questions in the meta field instead of listings. "
+            "IMPORTANT: Before calling this tool, ensure the user has specified at least a geographic area "
+            "(city, canton, or neighborhood). If they have not, ask for it first — do not call this tool with a vague query. "
+            "If the query is still too vague, the tool returns clarification questions in the meta field instead of listings. "
             "When you receive clarification questions, ask the user those questions, "
             "then call this tool again with a single query that combines the user's "
             "original preferences with their new answers."

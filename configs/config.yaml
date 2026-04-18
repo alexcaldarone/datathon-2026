@@ -1,5 +1,12 @@
+paths:
+  path_to_prompts: app/participant/prompts
+
+query_validator:
+  class_name: LLMQueryValidator
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
+
 hard_extractor:
-  class_name: DumbHardExtractor
+  class_name: LLMHardFactExtractor
   model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 
 soft_extractor:
