@@ -6,9 +6,11 @@ requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.39.0,<2.0.0",
     "fastapi>=0.115.0,<1.0.0",
+    "fastapi[standard]",
     "httpx>=0.28.0,<1.0.0",
     "mcp>=1.25.0",
     "uvicorn[standard]>=0.32.0,<1.0.0",
+    "pytest"
 ]
 
 [dependency-groups]
