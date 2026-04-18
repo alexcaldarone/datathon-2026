@@ -124,6 +124,16 @@ class CohereReRanker(ReRanker):
             return []
 
         query = soft_facts.get("query", "")
+        if not query:
+            return [
+                RankedListingResult(
+                    listing_id=str(c["listing_id"]),
+                    score=1.0,
+                    reason="No query provided; returning unranked.",
+                    listing=_to_listing_data(c),
+                )
+                for c in candidates
+            ]
         texts = [_to_document_text(c) for c in candidates]
         top_n = min(int(self.cfg.top_n), len(candidates))
 

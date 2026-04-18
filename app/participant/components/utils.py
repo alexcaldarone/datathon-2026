@@ -17,8 +17,6 @@ class Config:
         if cls._cfg is None:
             with initialize_config_dir(config_dir=_CONFIGS_DIR, version_base=None):
                 cls._cfg = compose(config_name="config")
-                # TODO: think of a better solution to expose prompts globally
-                os.environ["PATH_TO_PROMPTS"] = cls._cfg.paths.path_to_prompts
         return cls._cfg
 
 
@@ -27,5 +25,6 @@ def _instantiate(cfg_node: DictConfig, module: str) -> object:
     return cls(cfg_node)
 
 def read_system_prompt(class_name: str) -> str:
-    path_to_md = Path(os.environ["PATH_TO_PROMPTS"]) / f"{class_name}.md"
+    cfg = Config.get_cfg()
+    path_to_md = Path(cfg.paths.path_to_prompts) / f"{class_name}.md"
     return path_to_md.read_text()

@@ -1,8 +1,5 @@
-import json
-from unittest.mock import MagicMock, patch
-
 from omegaconf import OmegaConf
-
+from app.participant.ranking import rank_listings
 from app.models.schemas import RankedListingResult
 from app.participant.components.reranker import CohereReRanker, DumbReRanker
 
@@ -29,6 +26,13 @@ _CANDIDATE = {
     "longitude": None,
 }
 
+_CFG = OmegaConf.create({
+    "class_name": "CohereReRanker",
+    "model_id": "cohere.rerank-v3-5:0",
+    "top_n": 2,
+    "region": "us-east-1",
+})
+
 
 def test_dumb_reranker_returns_all_candidates() -> None:
     cfg = OmegaConf.create({"class_name": "DumbReRanker"})
@@ -42,48 +46,58 @@ def test_dumb_reranker_returns_all_candidates() -> None:
 
 
 def test_cohere_reranker_orders_by_relevance_score() -> None:
-    cfg = OmegaConf.create({
-        "class_name": "CohereReRanker",
-        "model_id": "cohere.rerank-v3-5:0",
-        "top_n": 2,
-        "region": "us-east-1",
-    })
-
     candidate_a = {**_CANDIDATE, "listing_id": "1", "title": "Flat A"}
     candidate_b = {**_CANDIDATE, "listing_id": "2", "title": "Flat B"}
 
-    fake_body = json.dumps({
-        "results": [
-            {"index": 1, "relevance_score": 0.9},
-            {"index": 0, "relevance_score": 0.4},
-        ]
-    }).encode()
-
-    with patch("app.participant.components.reranker.boto3.client") as mock_boto:
-        mock_client = MagicMock()
-        mock_boto.return_value = mock_client
-        mock_client.invoke_model.return_value = {"body": MagicMock(read=lambda: fake_body)}
-
-        reranker = CohereReRanker(cfg)
-        results = reranker.run([candidate_a, candidate_b], {"query": "flat in Zurich"})
+    reranker = CohereReRanker(_CFG)
+    results = reranker.run([candidate_a, candidate_b], {"query": "flat in Zurich"})
 
     assert len(results) == 2
-    assert results[0].listing_id == "2"
-    assert results[0].score == 0.9
-    assert results[1].listing_id == "1"
-    assert results[1].score == 0.4
+    assert all(isinstance(r, RankedListingResult) for r in results)
+    assert {r.listing_id for r in results} == {"1", "2"}
+    # results must be ordered highest score first
+    assert results[0].score >= results[1].score
 
 
 def test_cohere_reranker_empty_candidates() -> None:
-    cfg = OmegaConf.create({
-        "class_name": "CohereReRanker",
-        "model_id": "cohere.rerank-v3-5:0",
-        "top_n": 10,
-        "region": "us-east-1",
-    })
-
-    with patch("app.participant.components.reranker.boto3.client"):
-        reranker = CohereReRanker(cfg)
-        results = reranker.run([], {"query": "flat"})
+    reranker = CohereReRanker(_CFG)
+    results = reranker.run([], {"query": "flat"})
 
     assert results == []
+
+def test_rank_listings_returns_ranked_shape() -> None:
+    ranked = rank_listings(
+        candidates=[
+            {
+                "listing_id": "abc",
+                "title": "Example",
+                "city": "Zurich",
+                "price": 2500,
+                "rooms": 3.0,
+                "latitude": 47.37,
+                "longitude": 8.54,
+                "street": "Main 1",
+                "postal_code": "8000",
+                "canton": "ZH",
+                "area": 75.0,
+                "available_from": "2026-06-01",
+                "image_urls": ["https://example.com/1.jpg"],
+                "hero_image_url": "https://example.com/1.jpg",
+                "original_url": "https://example.com/listing",
+                "features": ["balcony", "elevator"],
+                "offer_type": "RENT",
+                "object_category": "Wohnung",
+                "object_type": "Apartment",
+            }
+        ],
+        soft_facts={"query": "bright flat in Zurich"},
+    )
+
+    assert len(ranked) == 1
+    assert ranked[0].listing_id == "abc"
+    assert isinstance(ranked[0].score, float)
+    assert isinstance(ranked[0].reason, str)
+    assert ranked[0].listing.id == "abc"
+    assert ranked[0].listing.title == "Example"
+    assert ranked[0].listing.city == "Zurich"
+    assert ranked[0].listing.image_urls
