@@ -20,9 +20,9 @@ def health() -> HealthResponse:
 
 
 @router.post("/listings", response_model=ListingsResponse)
-async def listings(request: ListingsQueryRequest) -> ListingsResponse:
+def listings(request: ListingsQueryRequest) -> ListingsResponse:
     settings = get_settings()
-    return await query_from_text(
+    return query_from_text(
         db_path=settings.db_path,
         query=request.query,
         limit=request.limit,

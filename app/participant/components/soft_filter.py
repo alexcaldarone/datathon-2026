@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
-from omegaconf import DictConfig
+import yaml
+from omegaconf import DictConfig, OmegaConf
 
+from app.ingestion.components.client import OpenSearchClient
+from app.ingestion.components.augmenters import build_augmenters
 from app.participant.components.utils import _instantiate
 
 _MODULE = "app.participant.components.soft_filter"
@@ -34,3 +38,104 @@ class DumbSoftFilter(SoftFilter):
         soft_facts: dict[str, Any],
     ) -> list[dict[str, Any]]:
         return candidates
+
+
+class HybridSimilarityFilter(SoftFilter):
+    # top-N terms from sparse BM25 weights included in the rank_features query
+    _SPARSE_TOP_K: int = 30
+
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+        ingestion_cfg = self._load_ingestion_cfg()
+        self._index = ingestion_cfg.index_name
+        self._pipeline = ingestion_cfg.pipeline_name
+        self._augmenters = build_augmenters(ingestion_cfg)
+        self._client = OpenSearchClient()  # singleton — not rebuilt per request
+
+    def run(
+        self,
+        candidates: list[dict[str, Any]],
+        soft_facts: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        query_text: str = soft_facts.get("_query", "")
+        if not query_text or not candidates:
+            return candidates
+
+        listing_ids = [c["listing_id"] for c in candidates]
+        query_listing = {"full_text": query_text}
+        features = {aug.field_name: aug.augment(query_listing).content for aug in self._augmenters}
+
+        resp = self._client.search(
+            index=self._index,
+            body=self._build_query(
+                query_text=query_text,
+                dense_vector=features.get("dense_embedding", []),
+                sparse_weights=features.get("sparse_embedding", {}),
+                listing_ids=listing_ids,
+            ),
+            pipeline=self._pipeline,
+        )
+
+        return [hit["_source"] for hit in resp["hits"]["hits"]]
+
+    def _build_query(
+        self,
+        query_text: str,
+        dense_vector: list[float],
+        sparse_weights: dict[str, float],
+        listing_ids: list[str],
+    ) -> dict:
+        n = len(listing_ids)
+        top_k = int(self.cfg.top_k)
+        candidate_filter = {"terms": {"listing_id": listing_ids}}
+
+        # top-N sparse terms by BM25 weight; rank_feature (singular) is the query type
+        top_terms = sorted(sparse_weights.items(), key=lambda x: -x[1])[:self._SPARSE_TOP_K]
+        sparse_query = {
+            "bool": {
+                "should": [{"rank_feature": {"field": f"sparse_embedding.{t}"}} for t, _ in top_terms],
+                "filter": candidate_filter,
+            }
+        }
+
+        return {
+            # return top_k; post_filter guarantees results come from the candidate set
+            "size": top_k,
+            "query": {
+                "hybrid": {
+                    "queries": [
+                        {
+                            "bool": {
+                                "must": {
+                                    "multi_match": {
+                                        "query": query_text,
+                                        "fields": ["full_text", "title", "description"],
+                                    }
+                                },
+                                "filter": candidate_filter,
+                            }
+                        },
+                        {
+                            # knn filter inside hybrid silently returns 0 hits — post_filter restricts instead
+                            "knn": {
+                                "dense_embedding": {
+                                    "vector": dense_vector,
+                                    # k=n covers the full candidate neighborhood before post_filter
+                                    "k": n,
+                                }
+                            }
+                        },
+                        sparse_query,
+                    ]
+                }
+            },
+            # restrict final results to the hard-filtered candidate set
+            "post_filter": candidate_filter,
+        }
+
+    @staticmethod
+    def _load_ingestion_cfg() -> DictConfig:
+        cfg_path = Path(__file__).parents[3] / "configs" / "ingestion" / "config.yaml"
+        with open(cfg_path) as f:
+            raw = yaml.safe_load(f)
+        return OmegaConf.create(raw)

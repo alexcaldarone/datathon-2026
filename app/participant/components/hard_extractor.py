@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import os
 from abc import abstractmethod, ABC
-from dotenv import load_dotenv
-load_dotenv("../../../.env")
 
 from pydantic_ai import Agent
 
-from app.models.schemas import ClarificationRequest, HardFilters
+from app.models.schemas import HardFilters
 
 from omegaconf import DictConfig
 

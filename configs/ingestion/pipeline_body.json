@@ -1,0 +1,14 @@
+{
+  "description": "Hybrid BM25 + dense kNN with Reciprocal Rank Fusion",
+  "phase_results_processors": [
+    {
+      "normalization-processor": {
+        "normalization": {
+          "technique": "rrf",
+          "parameters": { "rank_constant": 60 }
+        },
+        "combination": { "technique": "arithmetic_mean" }
+      }
+    }
+  ]
+}
