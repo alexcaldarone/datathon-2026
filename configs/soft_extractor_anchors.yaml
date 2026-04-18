@@ -10,6 +10,15 @@ daylight_score:
   - vül sunne am Nomittag
   - helli Zimmer
   - sunnig und schön
+  - hell
+  - viel Tageslicht
+  - appartement très clair
+  - beaucoup de lumière naturelle
+  - sonnendurchflutet
+  - helle Räume
+  - Südseite
+  - Abendsonne
+  - Morgensonne
 noise_level:
   - quiet area away from traffic
   - peaceful residential neighborhood
@@ -22,6 +31,16 @@ noise_level:
   - ganz ruhig
   - kei Lärm idä Nacht
   - stilli Umgäbig
+  - nicht zu lautes Quartier
+  - ruhig
+  - ruhige Wohnlage
+  - lärmgeschützt
+  - ruhiges Wohnumfeld
+  - kein Durchgangsverkehr
+  - Tempo 30 Zone
+  - verkehrsberuhigt
+  - hinteres Gebäude
+  - ruhiger Innenhof
 view_quality_score:
   - apartment with a view
   - panoramic mountain view
@@ -34,6 +53,12 @@ view_quality_score:
   - super Ussicht uf d Alpe
   - Zürisee Blick
   - mer gseht d Berge
+  - Seenähe
+  - herrliche Aussicht
+  - Blick ins Tal
+  - Alpenpanorama
+  - unverbaubare Aussicht
+  - Dachterrasse mit Fernblick
 green_view_ratio:
   - near nature and parks
   - overlooking a garden
@@ -46,6 +71,13 @@ green_view_ratio:
   - nöch a dr Natur
   - mer gseht Bäum und Gras
   - bi de Allemände
+  - grüne Umgebung
+  - nahe am Wald
+  - Wiese vor der Tür
+  - Gartenblick
+  - umgeben von Bäumen
+  - Parks und Gärten
+  - Naherholungsgebiet
 walkability_score:
   - close to shops and groceries
   - central location near amenities
@@ -56,6 +88,13 @@ walkability_score:
   - Gute Inchauschance
   - mer cha alles z Fuäss mache
   - nöch bim Coop
+  - lebendiges Quartier
+  - Zentrumsnah
+  - alles in Gehdistanz
+  - Supermarkt um die Ecke
+  - Bäckerei in der Nähe
+  - mitten im Geschehen
+  - urbanes Leben
 public_transport_score:
   - near public transport tram train
   - good connection to city center
@@ -66,6 +105,11 @@ public_transport_score:
   - nöch bi de Tramstation
   - S-Bahn Aaschluss
   - gueti Verbindig
+  - guter Anbindung
+  - optimale ÖV-Anbindung
+  - wenige Minuten zur Haltestelle
+  - S-Bahn fussläufig
+  - Bushaltestelle vis-à-vis
 interior_modernity:
   - modern high-end interior
   - newly renovated finishings
@@ -78,6 +122,17 @@ interior_modernity:
   - alles neu renoviert
   - luxuriösi Usstattig
   - Abwäschmaschine
+  - Waschmaschine in der Wohnung
+  - moderne Küche
+  - gepflegtes Gebäude
+  - hochwertiger Parkett
+  - sanierte Wohnung
+  - Designerküche
+  - neuste Apparate
+  - V-Zug Geräte
+  - Regendusche
+  - Fussbodenheizung
+  - Eigener Waschturm
 work_from_home_fitness:
   - home office with high speed internet
   - quiet for focused work
@@ -88,6 +143,10 @@ work_from_home_fitness:
   - home office tauglich
   - guets WLAN
   - schnells Netz
+  - Arbeitszimmer
+  - ruhiges Büro
+  - Homeoffice-Ecke
+  - viele Steckdosen
 spaciousness_perception:
   - large rooms high ceilings
   - generous floor plan
@@ -100,6 +159,12 @@ spaciousness_perception:
   - groissi Zimmer
   - luftig
   - grosszuegigs Wohnzimmer
+  - gut geschnitten
+  - grosszügiger Grundriss
+  - hohe Räume
+  - offenes Wohnen
+  - loftartig
+  - viel Stauraum
 neighborhood_safety_score:
   - safe family friendly area
   - kids playing outside
@@ -111,6 +176,10 @@ neighborhood_safety_score:
   - guet für Chind
   - sicher zum Spiele
   - familiefründlich
+  - ideal für Familien
+  - Spielplatz in der Siedlung
+  - sicherer Schulweg
+  - ruhiges Familienquartier
 proximity_to_desired_location_score:
   - close to specific destination
   - near university
@@ -122,3 +191,7 @@ proximity_to_desired_location_score:
   - nöch bi de Arbet
   - schnäll bi de Uni
   - öppe 10 minete vo de Stadt
+  - zentrale Lage
+  - nahe beim Hauptbahnhof
+  - unmittelbare Nähe
+  - kurze Distanz
