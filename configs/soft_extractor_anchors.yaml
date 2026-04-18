@@ -1,535 +1,5 @@
 daylight_score:
   positive:
-    - helle Wohnung mit viel Tageslicht
-    - lichtdurchflutete Räume
-    - grosse Fenster mit direkter Sonneneinstrahlung
-    - sonnige Südlage mit viel Licht
-    - Wohnung mit viel natürlichem Licht
-    - viel Sonne den ganzen Tag
-    - helle Zimmer und lichtdurchflutet
-    - Wohnung mit Abendsonne
-    - Morgensonne im Schlafzimmer
-    - helli Wohnig mit viel Sunne
-    - lichtdurchflutet und sonnig
-    - Südseite mit direkter Sonne
-    - grosse Fensterfront sehr hell
-    - vül Tageslicht und helli Räum
-    - sonnigi Wohnig isch mir wichtig
-    - Wohnig wo d Sunne reinkommt
-    - sehr helle Wohnung bevorzugt
-    - sonnendurchflutet ganztägig
-    - Tageslicht sehr wichtig für mich
-    - helli und freundlichi Wohnig gsueche
-    - Fenster die viel Licht reinlassen
-    - Wohnung mit viel Sonne am Nachmittag
-    - hell und luftig soll es sein
-    - mir isch es wichtig dass d Wohnig hell isch
-    - sunnigs Zuhause sehr wichtig
-  negative:
-    - Nordseitige Lage ist kein Problem
-    - dunkle gemütliche Wohnung bevorzugt
-    - Tageslicht nicht wichtig für mich
-    - Nordseitig ist mir egal
-    - kein Wert auf Sonneneinstrahlung
-    - dunkle Räume stören mich nicht
-    - ich brauche kein helles Apartment
-    - Verdunkelung wichtiger als Helligkeit
-    - Licht isch mir egal bei dr Wohnig
-    - ich mag eher dunkle gemütliche Räume
-    - Nordseite ist völlig in Ordnung
-    - kein Bedarf an viel natürlichem Licht
-    - Tageslicht spielt keine Rolle für mich
-    - es muss nöd hell si bi mir
-    - Helligkeit isch mir nöd so wichtig
-
-orientation_quality:
-  positive:
-    - Südausrichtung der Wohnung gewünscht
-    - Wohnung mit Südwestlage bevorzugt
-    - Ostseite für Morgensonne im Schlafzimmer
-    - sonnige Ausrichtung sehr wichtig
-    - gute Himmelsausrichtung gewünscht
-    - Südlage damit die Sonne reinkommt
-    - Westseite mit Abendsonne bevorzugt
-    - optimale Ausrichtung zur Sonne
-    - Wohnung soll Richtung Süden zeigen
-    - Ausrichtung zur Sonne isch mir wichtig
-    - ich lege Wert auf Südausrichtung
-    - Südseite oder Südwestseite bevorzugt
-    - Sonnenseite des Gebäudes sehr wichtig
-    - Ausrichtung spielt eine grosse Rolle
-    - d Wohnig soll sunsiitig si
-    - günstige Himmelsrichtung für viel Sonne
-  negative:
-    - Ausrichtung spielt keine Rolle
-    - Nordseite ist völlig in Ordnung
-    - Himmelsrichtung ist mir egal
-    - Ausrichtung unwichtig für mich
-    - Nordlage kein Problem
-    - egal welche Himmelsrichtung
-    - ich achte nicht auf die Ausrichtung
-    - Ausrichtung isch mer völlig egal
-    - Nordseite oder Südseite macht mir keinen Unterschied
-    - d Ussrichtig isch mer wurscht
-
-noise_level:
-  positive:
-    - ruhiges Wohnquartier ohne Strassenlärm
-    - stille Umgebung sehr wichtig
-    - Wohnung in ruhiger Lage gesucht
-    - kein Strassenlärm erwünscht
-    - lärmgeschützte Lage bevorzugt
-    - ruhige Wohnlage ist mir sehr wichtig
-    - kein Verkehrslärm in der Nacht
-    - schalldichte Fenster und ruhige Strasse
-    - Ruhe ist mir beim Wohnen sehr wichtig
-    - ganz ruhige Lage gesucht
-    - keine Fluglärm oder Zugslärm
-    - verkehrsberuhigte Zone bevorzugt
-    - Tempo-30-Zone oder ruhige Seitenstrasse
-    - ruhiger Innenhof oder Hinterliegenschaft
-    - stilli Umgäbig isch mer sehr wichtig
-    - kei Lärm idä Nacht das isch wichtig
-    - ich schlafe schlecht bei Lärm
-    - ruhigs Quartier dringend gesucht
-    - Lärmbelastung muss minimal sein
-    - kein Durchgangsverkehr vor dem Haus
-    - ich brauche absolute Stille zum Schlafen
-    - ruhige Seitenstrasse ohne Verkehr
-    - ich vermeide laute Quartiere
-    - mir isch Ruhe beim Wohne sehr wichtig
-    - lärmfreie Umgebung sehr wichtig
-    - ich möchte keine lauten Nachbarn
-    - seriöse ruhige Wohnlage gewünscht
-  negative:
-    - lautes lebendiges Quartier ist kein Problem
-    - Strassenlärm stört mich nicht
-    - ich wohne gerne an belebten Strassen
-    - laute Umgebung ist in Ordnung
-    - Lärm stört mich beim Schlafen nicht
-    - Nachtleben und Belebung sind mir wichtig
-    - ich mag lebhafte laute Quartiere
-    - belebte Strasse ist ok für mich
-    - Lärmpegel spielt keine Rolle
-    - ich brauche keine Ruhe in der Nacht
-    - Strassenlärm ist mir völlig egal
-    - lüt und belebt isch ok für mich
-    - ich stör mich nöd am Lärm
-    - lauti Umgäbig isch mir egal
-    - Lärm stört mich überhaupt nicht
-    - ich suche ein lebhaftes Quartier mit Lärm
-
-sound_insulation_quality:
-  positive:
-    - gute Schalldämmung sehr wichtig
-    - Nachbarn sollte man nicht hören
-    - dicke Wände und gute Isolation
-    - Dreifachverglasung oder gute Fenster
-    - schallgeschützte Wohnung gesucht
-    - man soll die Nachbarn nicht hören
-    - akustisch gut gedämmte Wohnung
-    - kein Trittschall von oben
-    - Schalldämmung ist mir sehr wichtig
-    - ich will keine Geräusche von Nachbarn hören
-    - guti Schalldämmig isch sehr wichtig
-    - Wohnung wo mer d Nachbarn nöd hört
-    - dicke Mauern für Ruhe in der Wohnung
-    - schallisoliert und ruhig innen
-    - ich vermeide Wohnungen mit schlechter Dämmung
-    - Lärm von Nachbarn ist ein No-Go
-  negative:
-    - Schalldämmung spielt keine Rolle
-    - Nachbarn hören stört mich nicht
-    - Schalldämmung ist mir egal
-    - ich lege keinen Wert auf Schallschutz
-    - Trittschall ist kein Problem für mich
-    - Schalldämmig isch mer wurscht
-    - Nachbarn hören isch mir egal
-    - kein Bedarf an besonderer Schalldämmung
-
-view_quality_score:
-  positive:
-    - Wohnung mit schöner Aussicht gesucht
-    - Panoramablick auf die Berge gewünscht
-    - Seesicht sehr wichtig
-    - Weitblick über die Stadt
-    - Aussicht auf den Zürichsee bevorzugt
-    - herrliche unverbaubare Aussicht
-    - Bergblick aus dem Wohnzimmer
-    - schöne Aussicht ist mir sehr wichtig
-    - Blick in die Natur oder auf den See
-    - ich möchte eine schöne Aussicht haben
-    - Alpenpanorama vom Balkon
-    - Dachterrasse mit Fernblick
-    - tolli Ussicht isch mir sehr wichtig
-    - Seesicht oder Bergblick bevorzugt
-    - Blick ins Grüne oder über die Stadt
-    - ich vermeide Wohnungen ohne Aussicht
-    - gute Aussicht ist ein Muss für mich
-    - Ussicht uf See oder Bärge isch wunderschön
-    - unverbaubare Aussicht sehr wichtig
-    - Blick über die Dächer der Stadt
-  negative:
-    - Aussicht spielt keine Rolle
-    - Erdgeschoss ist in Ordnung
-    - ich brauche keine schöne Aussicht
-    - Aussicht ist mir völlig egal
-    - kein Bedarf an besonderem Ausblick
-    - Erdgeschoss oder erstes Stockwerk reicht
-    - Aussicht isch mer völlig egal
-    - ich achte nicht auf den Ausblick
-    - Aussicht spielt keine Rolle für mich
-    - kei schöni Ussicht nötig
-
-green_view_ratio:
-  positive:
-    - Nähe zu Parks und Grünflächen wichtig
-    - Blick ins Grüne sehr schön
-    - naturnahes Wohnumfeld gesucht
-    - Wald oder Park in der Nähe
-    - grüne Umgebung sehr wichtig
-    - Gartenblick aus dem Fenster
-    - Bäume und Natur vor dem Haus
-    - Grünflächen in der Umgebung wichtig
-    - ich möchte nah an der Natur wohnen
-    - Wohnung mit Gartenanteil bevorzugt
-    - Wiese und Natur vor der Haustür
-    - nöch a dr Natur wohne isch schön
-    - grüni Umgäbig isch mir wichtig
-    - Park oder Wald in Gehdistanz
-    - umgeben von Bäumen und Gärten
-    - Naherholungsgebiet in der Nähe wichtig
-    - ich suche Wohnung mit Naturblick
-    - Natur und Grün vor dem Fenster wichtig
-    - ich vermeide betonierte Stadtlagen
-    - grünes Wohnquartier stark bevorzugt
-  negative:
-    - Grünflächen sind mir nicht wichtig
-    - urbane Lage wichtiger als Natur
-    - ich brauche keine Parks in der Nähe
-    - Natur und Grün spielen keine Rolle
-    - kein Bedarf an Grünflächen
-    - Grün isch mer egal
-    - Natur spielt keine Rolle für mich
-    - ich bevorzuge urbane Umgebung ohne Natur
-    - Grünflächen unwichtig für mich
-    - Stadtlage ohne Natur ist völlig ok
-
-walkability_score:
-  positive:
-    - Einkaufsmöglichkeiten zu Fuss erreichbar
-    - alles in Gehdistanz vom Haus
-    - Migros oder Coop ums Eck
-    - lebendiges Quartier mit Läden
-    - zentrumsnahe Lage sehr wichtig
-    - Bäckerei und Apotheke zu Fuss erreichbar
-    - ich möchte alles zu Fuss erledigen
-    - Supermarkt in unmittelbarer Nähe
-    - gute Infrastruktur im Quartier
-    - Restaurants und Cafés in der Nähe
-    - ich mag urbanes Leben mit vielen Läden
-    - mer cha alles z Fuäss mache isch super
-    - nöch bim Coop und dr Migros
-    - Quartier mit guter Grundversorgung
-    - ich will keine weiten Wege zu Läden
-    - belebtes Quartier mit guter Infrastruktur
-    - mitten im Geschehen wohnen
-    - alles in Laufdistanz vom Haus
-    - ich vermeide autoabhängige Lagen
-    - kurze Wege zu Alltäglichem wichtig
-  negative:
-    - ich habe ein Auto Läden egal
-    - Einkaufsmöglichkeiten zu Fuss nicht wichtig
-    - abgelegene Lage ist ok für mich
-    - Gehdistanz zu Läden spielt keine Rolle
-    - ich fahre mit dem Auto einkaufen
-    - Infrastruktur im Quartier nicht so wichtig
-    - ich bruche kei Läde i dr Nächi
-    - Auto vorhanden Gehweg egal
-    - Walkability isch mer wurscht
-    - abgelegeni Lage isch ok
-
-public_transport_score:
-  positive:
-    - gute Anbindung an den öffentlichen Verkehr
-    - Tramhaltestelle vor der Haustür
-    - Bahnhof in Gehdistanz
-    - S-Bahn-Anschluss in der Nähe
-    - optimale ÖV-Anbindung sehr wichtig
-    - Bushaltestelle direkt vor dem Haus
-    - wenige Minuten zur nächsten Haltestelle
-    - gute Verbindung ins Stadtzentrum
-    - ich möchte kein Auto brauchen
-    - S-Bahn fussläufig vom Wohnort
-    - ÖV-Anschluss ist mir sehr wichtig
-    - ich fahre täglich mit dem ÖV
-    - nöch bi de Tramstation isch sehr wichtig
-    - gueti ÖV-Verbindig isch ein Muss
-    - Bushaltestelle vis-à-vis sehr praktisch
-    - ich vermeide Lagen ohne ÖV-Anschluss
-    - täglich mit Tram oder Bus unterwegs
-    - gute Verbindung mit Zug oder Tram
-    - ohne Auto auf ÖV angewiesen
-    - ÖV muss sehr gut sein
-  negative:
-    - ich habe ein Auto ÖV unwichtig
-    - öffentlicher Verkehr spielt keine Rolle
-    - ÖV-Anbindung ist mir egal
-    - ich fahre immer mit dem Auto
-    - kein Bedarf an ÖV-Anschluss
-    - Tram oder Bus nicht wichtig
-    - ÖV isch mer völlig egal
-    - ich bruche kei ÖV ich ha es Auto
-    - Tramhaltestelle nicht notwendig
-    - ÖV-Anbindung unwichtig für mich
-
-centrality_index:
-  positive:
-    - zentrale Lage in der Stadt
-    - mitten in der Stadt wohnen
-    - Innenstadtlage sehr bevorzugt
-    - im Herzen der Stadt wohnen
-    - sehr zentrale Lage gewünscht
-    - Stadtzentrumsnähe sehr wichtig
-    - zentrumsnah und urban wohnen
-    - ich möchte zentral in der Stadt wohnen
-    - Wohnung im Stadtzentrum gesucht
-    - zentral und alles zu Fuss erreichbar
-    - mitten im Stadtleben wohnen
-    - ich vermeide Randlagen und Vororte
-    - zentral und gut gelegen ist wichtig
-    - mir isch zentral wohne sehr wichtig
-    - im Zentrum isch das Beste
-    - zentrumsnahe Lage ein Muss für mich
-  negative:
-    - ruhige Vorortlage bevorzugt
-    - Aussenlage oder Agglomeration ist ok
-    - Stadtrand ist für mich völlig in Ordnung
-    - ausserhalb des Zentrums bevorzugt
-    - Landlage oder Vorort bevorzugt
-    - ich mag ruhige Lagen ausserhalb der Stadt
-    - ich vermeide das Stadtzentrum
-    - Vorort oder Agglomeration kein Problem
-    - ländliche Umgebung stark bevorzugt
-    - ausserhalb der Stadt wohnen isch ok
-
-neighborhood_safety_score:
-  positive:
-    - sicheres und familienfreundliches Quartier
-    - sicherer Schulweg für Kinder wichtig
-    - ruhiges Familienquartier gesucht
-    - Kinder können draussen spielen
-    - sicheres Wohnumfeld sehr wichtig
-    - kriminalarmes Quartier bevorzugt
-    - familienfreundliche sichere Umgebung
-    - Spielplatz und Schulen in der Nähe
-    - sicheres Quartier ist mir sehr wichtig
-    - ich möchte mich nachts sicher fühlen
-    - guet für Chind und Familie
-    - sicheres und ruhiges Familienquartier
-    - ich vermeide unsichere Stadtteile
-    - Sicherheit im Quartier sehr wichtig
-    - ideal für Familien mit Kindern
-    - sicherer Schulweg ist ein Muss
-    - kinderfreundliches Quartier gesucht
-  negative:
-    - Sicherheit spielt keine grosse Rolle
-    - urbanes lebhaftes Quartier auch nachts ok
-    - Sicherheit nicht meine Priorität
-    - ich lege keinen Wert auf ein ruhiges Quartier
-    - Sicherheit ist mir weniger wichtig
-    - Sicherheit isch mer nöd so wichtig
-    - Quartier muss nöd super sicher si
-    - Sicherheit spielt keine Rolle für mich
-
-proximity_to_desired_location_score:
-  positive:
-    - kurzer Arbeitsweg sehr wichtig
-    - nah an der Universität wohnen
-    - wenige Minuten zum Büro
-    - kurze Distanz zum Hauptbahnhof
-    - nah am Zielort wohnen
-    - kurzer Schulweg für die Kinder
-    - nahe beim Spital oder der Uni
-    - Pendeldistanz muss kurz sein
-    - ich möchte nah an der Arbeit wohnen
-    - in der Nähe der ETH wohnen
-    - nöch bi dr Arbet isch sehr wichtig
-    - kurzer Weg zur Uni oder zum Job
-    - ich vermeide lange Arbeitswege
-    - Nähe zum Arbeitsplatz ist ein Muss
-    - unmittelbare Nähe zu meinem Zielort
-    - Pendelzeit sollte minimal sein
-    - kurze Distanz zum Arbeitsplatz gewünscht
-  negative:
-    - Pendelweg spielt keine Rolle
-    - langer Arbeitsweg ist kein Problem
-    - ich pendle gerne auch weiter
-    - Distanz zum Arbeitsplatz egal
-    - kein spezifischer Zielort nötig
-    - Arbeitsweg ist mir egal
-    - Pendeln isch kein Problem für mich
-    - lange Distanz zum Job ist ok
-    - Nähe zu Zielorten unwichtig
-
-air_quality_index:
-  positive:
-    - frische Luft sehr wichtig
-    - keine Luftverschmutzung in der Umgebung
-    - saubere Luft ist mir wichtig
-    - weit weg von Abgasen und Verkehr
-    - Luftqualität ist ein wichtiges Kriterium
-    - keine Industrie oder Verkehr in der Nähe
-    - gute Luftqualität im Quartier
-    - ich möchte nicht neben einer Hauptstrasse wohnen
-    - saubere Luft und wenig Abgase
-    - ich vermeide Lagen mit schlechter Luft
-    - frische Luft isch mer sehr wichtig
-    - gute Luftqualität stark bevorzugt
-    - keine Abgase vom Verkehr wichtig
-    - abseits von stark befahrenen Strassen
-    - Luftqualität spielt für mich eine grosse Rolle
-  negative:
-    - Luftqualität spielt keine Rolle
-    - Nähe zur Hauptstrasse kein Problem
-    - Abgase stören mich nicht
-    - Luftverschmutzung ist mir egal
-    - Luftqualität unwichtig für mich
-    - Luftqualität isch mer egal
-    - Abgase stören mich überhaupt nicht
-    - nah an der Hauptstrasse ist ok
-
-spaciousness_perception:
-  positive:
-    - grosse Zimmer und hohe Decken
-    - grosszügiger Grundriss bevorzugt
-    - viel Platz und Stauraum gewünscht
-    - offenes Wohnkonzept sehr schön
-    - luftige und grosszügige Wohnung
-    - ich brauche viel Platz zum Wohnen
-    - loftartige Wohnung mit hohen Decken
-    - grosse Küche und grosses Wohnzimmer
-    - Wohnung soll sehr geräumig sein
-    - viel Stauraum und guter Grundriss
-    - hohe Räume und offener Grundriss
-    - grosszügi Zimmer mit vill Platz
-    - vill Platz zum Wohne isch wichtig
-    - ich vermeide kleine enge Wohnungen
-    - grosszügige Wohnfläche ein Muss
-    - offenes Wohnen mit viel Raum
-    - mir ist viel Platz in der Wohnung wichtig
-  negative:
-    - kleine gemütliche Wohnung reicht
-    - Platz ist nicht so wichtig
-    - kompaktes Studio ist genug
-    - kleine Wohnung ist völlig ok
-    - ich brauche nicht viel Platz
-    - Grösse spielt keine grosse Rolle
-    - kleini Wohnig reicht mir völlig
-    - Studio oder kleines Apartment ok
-    - Platz isch nöd so wichtig
-    - kompakt und gemütlich reicht mir
-
-interior_modernity:
-  positive:
-    - moderne hochwertige Innenausstattung gewünscht
-    - neu renovierte Wohnung bevorzugt
-    - moderni Chuchi mit neuen Geräten
-    - Erstbezug nach Sanierung sehr interessant
-    - zeitgemässe und moderne Einrichtung
-    - Designerküche und hochwertige Böden
-    - Fussbodenheizung und Regendusche
-    - V-Zug Geräte und moderne Küche
-    - Wohnung soll frisch renoviert sein
-    - neuste Haushaltgeräte gewünscht
-    - moderne Ausstattung ist mir wichtig
-    - ich bevorzuge neu renovierte Wohnungen
-    - alles neu und modern eingerichtet
-    - hochwertiger Parkett oder Naturstein
-    - Waschmaschine in der Wohnung wichtig
-    - ich vermeide alte unrenovierte Wohnungen
-    - Neubau oder frisch saniert bevorzugt
-    - moderni Usstattung isch sehr wichtig
-    - moderne Küche und Bad gewünscht
-    - hochwertige Materialien und Oberflächen
-  negative:
-    - ich vermeide moderne Wohnungen
-    - Altbau mit Charme wird bevorzugt
-    - historisches Gebäude sehr schön
-    - ich mag keine modernen Wohnungen
-    - Patina und Geschichte gefällt mir
-    - alte Böden und hohe Decken im Altbau
-    - moderni Wohnig isch nöd mis Ding
-    - ich steh nicht auf modernes Design
-    - rustikale traditionelle Ausstattung bevorzugt
-    - Altbau isch vill schöner als Neubau
-    - moderne Ausstattung nicht notwendig
-    - lieber Altbau mit Charakter
-    - ich mag kein steriles modernes Design
-    - Neubau interessiert mich nicht
-    - ich suche keinen Neubau
-
-livability_score:
-  positive:
-    - hohes Wohnqualitätsniveau sehr wichtig
-    - lebendiges und angenehmes Quartier
-    - schöne Nachbarschaft und gutes Umfeld
-    - angenehme Wohnqualität gewünscht
-    - gutes Quartier mit hoher Lebensqualität
-    - ich möchte in einem schönen Quartier leben
-    - tolle Nachbarschaft und gutes Klima im Quartier
-    - Wohnqualität ist mir sehr wichtig
-    - ich lege Wert auf gutes Wohnumfeld
-    - ich vermeide unangenehme Quartiere
-    - hohi Läbensqualität isch mir wichtig
-    - schöns Quartier mit gutem Wohnklima
-    - angenehms Wohnumfeld stark bevorzugt
-    - gutes Wohnambiente sehr wichtig
-    - ich will in einem schönen Umfeld wohnen
-  negative:
-    - Wohnqualität spielt keine Rolle
-    - Hauptsache günstig egal wo
-    - ich bin nicht wählerisch beim Quartier
-    - Wohnumfeld ist mir egal
-    - Wohnqualität unwichtig für mich
-    - Hauptsach günstig und egal wo
-    - Quartierqualität spielt keine Rolle
-    - ich stell keine hohen Ansprüche ans Wohnumfeld
-
-work_from_home_fitness:
-  positive:
-    - Homeoffice-taugliche Wohnung gesucht
-    - separates Arbeitszimmer sehr wichtig
-    - schnelles Internet für Remote-Arbeit nötig
-    - Glasfaseranschluss gewünscht
-    - ruhiger Arbeitsplatz in der Wohnung
-    - ich arbeite täglich von zu Hause
-    - gutes WLAN und schnelles Internet wichtig
-    - Wohnung mit eigenem Büroraum bevorzugt
-    - Homeoffice-Ecke oder Arbeitszimmer nötig
-    - viele Steckdosen und gute Infrastruktur
-    - ruhige Wohnung für Videokonferenzen
-    - ich bin auf schnelles Internet angewiesen
-    - Home Office isch täglich mein Alltag
-    - guets WLAN und ruhigs Arbeitszimmer wichtig
-    - ich vermeide Wohnungen ohne Internetanschluss
-    - Remote Work ist mein Arbeitsmodell
-    - Arbeitszimmer oder ruhige Arbeitsecke gewünscht
-    - schnells Internet isch ein Muss für mich
-    - ich brauche gute Infrastruktur für Home Office
-  negative:
-    - ich arbeite nicht von zu Hause
-    - Home Office ist kein Thema für mich
-    - ich gehe täglich ins Büro
-    - kein Bedarf an Arbeitszimmer
-    - Remote Work spielt keine Rolle
-    - Home Office bruche ich überhaupt nicht
-    - ich arbeite jeden Tag im Büro
-    - Homeoffice-Ausstattung unwichtig
-    - kein Homeoffice nötig
-    - Home Office isch nöd wichtig für mich
-
-daylight_score:
   - bright apartment with sun
   - natural light
   - floor to ceiling windows
@@ -541,7 +11,48 @@ daylight_score:
   - vül sunne am Nomittag
   - helli Zimmer
   - sunnig und schön
+  negative:
+  - Nordseitige Lage ist kein Problem
+  - dunkle gemütliche Wohnung bevorzugt
+  - Tageslicht nicht wichtig für mich
+  - kein Wert auf Sonneneinstrahlung
+  - dunkle Räume stören mich nicht
+  - ich brauche kein helles Apartment
+  - Helligkeit isch mir nöd so wichtig
+  - es muss nöd hell si bi mir
+  - Nordseite ist völlig in Ordnung
+  - Licht isch mir egal bei dr Wohnig
+orientation_quality:
+  positive:
+  - Südausrichtung der Wohnung gewünscht
+  - Wohnung mit Südwestlage bevorzugt
+  - Ostseite für Morgensonne im Schlafzimmer
+  - sonnige Ausrichtung sehr wichtig
+  - gute Himmelsausrichtung gewünscht
+  - Südlage damit die Sonne reinkommt
+  - Westseite mit Abendsonne bevorzugt
+  - optimale Ausrichtung zur Sonne
+  - Wohnung soll Richtung Süden zeigen
+  - Ausrichtung zur Sonne isch mir wichtig
+  - ich lege Wert auf Südausrichtung
+  - Südseite oder Südwestseite bevorzugt
+  - Sonnenseite des Gebäudes sehr wichtig
+  - Ausrichtung spielt eine grosse Rolle
+  - d Wohnig soll sunsiitig si
+  - günstige Himmelsrichtung für viel Sonne
+  negative:
+  - Ausrichtung spielt keine Rolle
+  - Nordseite ist völlig in Ordnung
+  - Himmelsrichtung ist mir egal
+  - Ausrichtung unwichtig für mich
+  - Nordlage kein Problem
+  - egal welche Himmelsrichtung
+  - ich achte nicht auf die Ausrichtung
+  - Ausrichtung isch mer völlig egal
+  - Nordseite oder Südseite macht mir keinen Unterschied
+  - d Ussrichtig isch mer wurscht
 noise_level:
+  positive:
   - quiet area away from traffic
   - peaceful residential neighborhood
   - soundproof windows
@@ -553,7 +64,64 @@ noise_level:
   - ganz ruhig
   - kei Lärm idä Nacht
   - stilli Umgäbig
+  negative:
+  - laut
+  - laute Wohnung
+  - ich will eine laute Wohnung
+  - lautes Quartier
+  - Lärm ist ok
+  - Lärm stört mich nicht
+  - laute Umgebung gewünscht
+  - ich mag Lärm
+  - laut und lebendig
+  - laut ist kein Problem
+  - laute Strasse ist in Ordnung
+  - lautes lebendiges Quartier
+  - Strassenlärm stört mich nicht
+  - ich wohne gerne an lauten Strassen
+  - ich mag lebhafte laute Quartiere
+  - Lärmpegel spielt keine Rolle
+  - Strassenlärm ist mir völlig egal
+  - ich stör mich nöd am Lärm
+  - lauti Umgäbig isch mir egal
+  - ich suche ein lebhaftes Quartier mit Lärm
+  - Lärm macht mir nichts aus
+  - Nachtleben und Belebung sind mir wichtig
+  - belebte laute Strasse ist ok
+  - ich brauche keine Ruhe in der Nacht
+  - lauts Quartier isch ok für mich
+  - Lärm isch kein Problem
+  - ich will es laut ha
+  - luut und lebendig isch super
+sound_insulation_quality:
+  positive:
+  - gute Schalldämmung sehr wichtig
+  - Nachbarn sollte man nicht hören
+  - dicke Wände und gute Isolation
+  - Dreifachverglasung oder gute Fenster
+  - schallgeschützte Wohnung gesucht
+  - man soll die Nachbarn nicht hören
+  - akustisch gut gedämmte Wohnung
+  - kein Trittschall von oben
+  - Schalldämmung ist mir sehr wichtig
+  - ich will keine Geräusche von Nachbarn hören
+  - guti Schalldämmig isch sehr wichtig
+  - Wohnung wo mer d Nachbarn nöd hört
+  - dicke Mauern für Ruhe in der Wohnung
+  - schallisoliert und ruhig innen
+  - ich vermeide Wohnungen mit schlechter Dämmung
+  - Lärm von Nachbarn ist ein No-Go
+  negative:
+  - Schalldämmung spielt keine Rolle
+  - Nachbarn hören stört mich nicht
+  - Schalldämmung ist mir egal
+  - ich lege keinen Wert auf Schallschutz
+  - Trittschall ist kein Problem für mich
+  - Schalldämmig isch mer wurscht
+  - Nachbarn hören isch mir egal
+  - kein Bedarf an besonderer Schalldämmung
 view_quality_score:
+  positive:
   - apartment with a view
   - panoramic mountain view
   - lake view from rooftop
@@ -565,7 +133,17 @@ view_quality_score:
   - super Ussicht uf d Alpe
   - Zürisee Blick
   - mer gseht d Berge
+  negative:
+  - Aussicht spielt keine Rolle für mich
+  - Erdgeschoss ist völlig in Ordnung
+  - Aussicht ist mir völlig egal
+  - kein Bedarf an besonderem Ausblick
+  - Aussicht isch mer völlig egal
+  - kei schöni Ussicht nötig
+  - ich brauche keine schöne Aussicht
+  - ich achte nicht auf den Ausblick
 green_view_ratio:
+  positive:
   - near nature and parks
   - overlooking a garden
   - green surroundings
@@ -577,7 +155,17 @@ green_view_ratio:
   - nöch a dr Natur
   - mer gseht Bäum und Gras
   - bi de Allemände
+  negative:
+  - Grünflächen sind mir nicht wichtig
+  - urbane Lage wichtiger als Natur
+  - Natur spielt keine Rolle für mich
+  - kein Bedarf an Grünflächen
+  - Grün isch mer egal
+  - Stadtlage ohne Natur ist völlig ok
+  - ich bevorzuge urbane Umgebung ohne Natur
+  - Grünflächen unwichtig für mich
 walkability_score:
+  positive:
   - close to shops and groceries
   - central location near amenities
   - walkable distance to pharmacy
@@ -587,7 +175,17 @@ walkability_score:
   - Gute Inchauschance
   - mer cha alles z Fuäss mache
   - nöch bim Coop
+  negative:
+  - ich habe ein Auto Läden egal
+  - Einkaufsmöglichkeiten zu Fuss nicht wichtig
+  - abgelegene Lage ist ok für mich
+  - ich fahre mit dem Auto einkaufen
+  - Auto vorhanden Gehweg egal
+  - Walkability isch mer wurscht
+  - ich bruche kei Läde i dr Nächi
+  - abgelegeni Lage isch ok
 public_transport_score:
+  positive:
   - near public transport tram train
   - good connection to city center
   - short walk to station
@@ -597,29 +195,112 @@ public_transport_score:
   - nöch bi de Tramstation
   - S-Bahn Aaschluss
   - gueti Verbindig
-interior_modernity:
-  - modern high-end interior
-  - newly renovated finishings
-  - dishwasher and washing machine
-  - luxury kitchen
-  - Moderne hochwertige Innenausstattung
-  - Erstbezug nach Sanierung
-  - Geschirrspüler vorhanden
-  - modärni Chuchi
-  - alles neu renoviert
-  - luxuriösi Usstattig
-  - Abwäschmaschine
-work_from_home_fitness:
-  - home office with high speed internet
-  - quiet for focused work
-  - fiber optic connection
-  - Idealer Arbeitsplatz für Home Office
-  - Glasfaseranschluss
-  - schnelles Internet
-  - home office tauglich
-  - guets WLAN
-  - schnells Netz
+  negative:
+  - ich habe ein Auto ÖV unwichtig
+  - ÖV-Anbindung ist mir egal
+  - ich fahre immer mit dem Auto
+  - ÖV isch mer völlig egal
+  - Tramhaltestelle nicht notwendig
+  - kein Bedarf an ÖV-Anschluss
+  - ich bruche kei ÖV ich ha es Auto
+  - öffentlicher Verkehr spielt keine Rolle
+centrality_index:
+  positive:
+  - zentrale Lage in der Stadt
+  - mitten in der Stadt wohnen
+  - Innenstadtlage sehr bevorzugt
+  - im Herzen der Stadt wohnen
+  - sehr zentrale Lage gewünscht
+  - Stadtzentrumsnähe sehr wichtig
+  - zentrumsnah und urban wohnen
+  - ich möchte zentral in der Stadt wohnen
+  - Wohnung im Stadtzentrum gesucht
+  - zentral und alles zu Fuss erreichbar
+  - mitten im Stadtleben wohnen
+  - ich vermeide Randlagen und Vororte
+  - zentral und gut gelegen ist wichtig
+  - mir isch zentral wohne sehr wichtig
+  - im Zentrum isch das Beste
+  - zentrumsnahe Lage ein Muss für mich
+  negative:
+  - ruhige Vorortlage bevorzugt
+  - Aussenlage oder Agglomeration ist ok
+  - Stadtrand ist für mich völlig in Ordnung
+  - ausserhalb des Zentrums bevorzugt
+  - Landlage oder Vorort bevorzugt
+  - ich mag ruhige Lagen ausserhalb der Stadt
+  - ich vermeide das Stadtzentrum
+  - Vorort oder Agglomeration kein Problem
+  - ländliche Umgebung stark bevorzugt
+  - ausserhalb der Stadt wohnen isch ok
+neighborhood_safety_score:
+  positive:
+  - safe family friendly area
+  - kids playing outside
+  - low crime neighborhood
+  - schools and kindergartens nearby
+  - Sicheres familienfreundliches Wohnquartier
+  - verkehrsberuhigte Zone
+  - Schule in der Nähe
+  - guet für Chind
+  - sicher zum Spiele
+  - familiefründlich
+  negative:
+  - Sicherheit spielt keine grosse Rolle
+  - Sicherheit nicht meine Priorität
+  - Sicherheit ist mir weniger wichtig
+  - Sicherheit isch mer nöd so wichtig
+  - urbanes lebhaftes Quartier auch nachts ok
+  - Quartier muss nöd super sicher si
+  - ich lege keinen Wert auf ein ruhiges Quartier
+proximity_to_desired_location_score:
+  positive:
+  - close to specific destination
+  - near university
+  - walking distance to workplace
+  - 15 minutes from city center
+  - In der Nähe vom Zielort
+  - kurzer Arbeitsweg
+  - Uni Nähe
+  - nöch bi de Arbet
+  - schnäll bi de Uni
+  - öppe 10 minete vo de Stadt
+  negative:
+  - Pendelweg spielt keine Rolle
+  - langer Arbeitsweg ist kein Problem
+  - Distanz zum Arbeitsplatz egal
+  - Pendeln isch kein Problem für mich
+  - ich pendle gerne auch weiter
+  - kein spezifischer Zielort nötig
+  - Nähe zu Zielorten unwichtig
+air_quality_index:
+  positive:
+  - frische Luft sehr wichtig
+  - keine Luftverschmutzung in der Umgebung
+  - saubere Luft ist mir wichtig
+  - weit weg von Abgasen und Verkehr
+  - Luftqualität ist ein wichtiges Kriterium
+  - keine Industrie oder Verkehr in der Nähe
+  - gute Luftqualität im Quartier
+  - ich möchte nicht neben einer Hauptstrasse wohnen
+  - saubere Luft und wenig Abgase
+  - ich vermeide Lagen mit schlechter Luft
+  - frische Luft isch mer sehr wichtig
+  - gute Luftqualität stark bevorzugt
+  - keine Abgase vom Verkehr wichtig
+  - abseits von stark befahrenen Strassen
+  - Luftqualität spielt für mich eine grosse Rolle
+  negative:
+  - Luftqualität spielt keine Rolle
+  - Nähe zur Hauptstrasse kein Problem
+  - Abgase stören mich nicht
+  - Luftverschmutzung ist mir egal
+  - Luftqualität unwichtig für mich
+  - Luftqualität isch mer egal
+  - Abgase stören mich überhaupt nicht
+  - nah an der Hauptstrasse ist ok
 spaciousness_perception:
+  positive:
   - large rooms high ceilings
   - generous floor plan
   - airy atmosphere
@@ -631,25 +312,84 @@ spaciousness_perception:
   - groissi Zimmer
   - luftig
   - grosszuegigs Wohnzimmer
-neighborhood_safety_score:
-  - safe family friendly area
-  - kids playing outside
-  - low crime neighborhood
-  - schools and kindergartens nearby
-  - Sicheres familienfreundliches Wohnquartier
-  - verkehrsberuhigte Zone
-  - Schule in der Nähe
-  - guet für Chind
-  - sicher zum Spiele
-  - familiefründlich
-proximity_to_desired_location_score:
-  - close to specific destination
-  - near university
-  - walking distance to workplace
-  - 15 minutes from city center
-  - In der Nähe vom Zielort
-  - kurzer Arbeitsweg
-  - Uni Nähe
-  - nöch bi de Arbet
-  - schnäll bi de Uni
-  - öppe 10 minete vo de Stadt
+  negative:
+  - kleine gemütliche Wohnung reicht mir
+  - Platz ist nicht so wichtig für mich
+  - kompaktes Studio ist genug
+  - ich brauche nicht viel Platz
+  - kleini Wohnig reicht mir völlig
+  - Platz isch nöd so wichtig
+  - Studio oder kleines Apartment ok
+  - kompakt und gemütlich reicht mir
+interior_modernity:
+  positive:
+  - modern high-end interior
+  - newly renovated finishings
+  - dishwasher and washing machine
+  - luxury kitchen
+  - Moderne hochwertige Innenausstattung
+  - Erstbezug nach Sanierung
+  - Geschirrspüler vorhanden
+  - modärni Chuchi
+  - alles neu renoviert
+  - luxuriösi Usstattig
+  - Abwäschmaschine
+  negative:
+  - ich vermeide moderne Wohnungen
+  - Altbau mit Charme wird bevorzugt
+  - ich mag keine modernen Wohnungen
+  - moderni Wohnig isch nöd mis Ding
+  - Altbau isch vill schöner als Neubau
+  - ich suche keinen Neubau
+  - rustikale traditionelle Ausstattung bevorzugt
+  - Patina und Geschichte gefällt mir
+  - historisches Gebäude sehr schön
+  - ich steh nicht auf modernes Design
+livability_score:
+  positive:
+  - hohes Wohnqualitätsniveau sehr wichtig
+  - lebendiges und angenehmes Quartier
+  - schöne Nachbarschaft und gutes Umfeld
+  - angenehme Wohnqualität gewünscht
+  - gutes Quartier mit hoher Lebensqualität
+  - ich möchte in einem schönen Quartier leben
+  - tolle Nachbarschaft und gutes Klima im Quartier
+  - Wohnqualität ist mir sehr wichtig
+  - ich lege Wert auf gutes Wohnumfeld
+  - ich vermeide unangenehme Quartiere
+  - hohi Läbensqualität isch mir wichtig
+  - schöns Quartier mit gutem Wohnklima
+  - angenehms Wohnumfeld stark bevorzugt
+  - gutes Wohnambiente sehr wichtig
+  - ich will in einem schönen Umfeld wohnen
+  negative:
+  - Wohnqualität spielt keine Rolle
+  - Hauptsache günstig egal wo
+  - ich bin nicht wählerisch beim Quartier
+  - Wohnumfeld ist mir egal
+  - Wohnqualität unwichtig für mich
+  - Hauptsach günstig und egal wo
+  - Quartierqualität spielt keine Rolle
+  - ich stell keine hohen Ansprüche ans Wohnumfeld
+work_from_home_fitness:
+  positive:
+  - home office with high speed internet
+  - quiet for focused work
+  - fiber optic connection
+  - Idealer Arbeitsplatz für Home Office
+  - Glasfaseranschluss
+  - schnelles Internet
+  - home office tauglich
+  - guets WLAN
+  - schnells Netz
+  negative:
+  - ich arbeite nicht von zu Hause
+  - Home Office ist kein Thema für mich
+  - ich gehe täglich ins Büro
+  - kein Bedarf an Arbeitszimmer
+  - Home Office bruche ich überhaupt nicht
+  - Homeoffice-Ausstattung unwichtig
+  - Remote Work spielt keine Rolle
+  - ich arbeite jeden Tag im Büro
+  - kein Homeoffice nötig
+  - Home Office isch nöd wichtig für mich
