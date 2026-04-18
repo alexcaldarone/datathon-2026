@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod, ABC
 from typing import Any
 import json
@@ -5,13 +7,23 @@ from sentence_transformers import SentenceTransformer, util
 import torch
 from app.models.schemas import SoftFactWeights
 
+from omegaconf import DictConfig
+
+from app.participant.components.utils import _instantiate
+
+_MODULE = "app.participant.components.soft_extractor"
+
+
+def build_soft_extractor(cfg: DictConfig) -> SoftFactExtractor:
+    return _instantiate(cfg.soft_extractor, _MODULE)
+
+
 class SoftFactExtractor(ABC):
-    def __init__(self):
-        self.results = {}
-        self.weights = SoftFactWeights()
+    def __init__(self, cfg: DictConfig):
+        self.cfg=cfg
 
     @abstractmethod
-    def run(self, query: str) -> list[dict[str, Any]]:
+    def run(self, query: str) -> dict[str, Any]:
         pass
 
 class LLMSoftFactExtractor(SoftFactExtractor):
@@ -20,8 +32,10 @@ class LLMSoftFactExtractor(SoftFactExtractor):
     """
     _model = None  # Class-level model cache
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+        self.results = {}
+        self.weights = SoftFactWeights()
         if LLMSoftFactExtractor._model is None:
             # Load the multilingual model requested by the user
             LLMSoftFactExtractor._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
@@ -166,3 +180,7 @@ class Property():
     def __init__(self, id: str, info: dict):
         self.id = id
         self.info = info
+
+class DumbSoftExtractor(SoftFactExtractor):
+    def run(self, _query: str) -> dict[str, Any]:
+        return {}
