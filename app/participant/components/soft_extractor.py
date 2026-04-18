@@ -116,13 +116,10 @@ class LLMSoftExtractor(SoftFactExtractor):
             max_pos_sim = float(torch.max(util.cos_sim(query_embedding, pos_embeddings))) if pos_embeddings is not None else 0.0
             max_neg_sim = float(torch.max(util.cos_sim(query_embedding, neg_embeddings))) if neg_embeddings is not None else 0.0
 
-            # Raw directional score: positive → user wants attribute high,
-            # negative → user wants attribute low. Unrelated queries produce
-            # similar pos/neg sims so the difference stays near 0.
+            # Raw directional score. tanh(k * raw) amplifies clear signals
+            # toward ±1 while keeping neutral queries near 0.
             raw = max_pos_sim - max_neg_sim
-
-            # Amplify by intensity, then clamp strictly to [-1, 1]
-            weight = min(1.0, max(-1.0, raw * intensity))
+            weight = float(torch.tanh(torch.tensor(raw * 3.0 * intensity)))
 
             weights_dict[attr] = round(weight, 2)
 
