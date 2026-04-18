@@ -10,7 +10,12 @@ dependencies = [
     "httpx>=0.28.0,<1.0.0",
     "mcp>=1.25.0",
     "uvicorn[standard]>=0.32.0,<1.0.0",
-    "pytest"
+    "pytest",
+    "pydantic-ai-slim[bedrock]>=1.84.1",
+    "python-dotenv>=1.2.2",
+    "ipykernel>=7.2.0",
+    "hydra-core>=1.3.2",
+    "requests"
 ]
 
 [dependency-groups]
