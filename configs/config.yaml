@@ -2,7 +2,9 @@ hard_extractor:
   class_name: DumbHardExtractor
 
 soft_extractor:
-  class_name: DumbSoftExtractor
+  class_name: LLMSoftExtractor
+  anchor_path: configs/soft_extractor_anchors.yaml
+  importance_keywords_path: configs/soft_extractor_importance_keywords.yaml
 
 soft_filter:
   class_name: DumbSoftFilter

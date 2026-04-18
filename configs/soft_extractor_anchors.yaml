@@ -1,0 +1,124 @@
+daylight_score:
+  - bright apartment with sun
+  - natural light
+  - floor to ceiling windows
+  - sunny balcony
+  - Helle Wohnung mit viel Sonne
+  - lichtdurchflutet
+  - direkte Sonneneinstrahlung
+  - grosse Fenster
+  - vül sunne am Nomittag
+  - helli Zimmer
+  - sunnig und schön
+noise_level:
+  - quiet area away from traffic
+  - peaceful residential neighborhood
+  - soundproof windows
+  - calm environment
+  - Ruhiges Quartier ohne Strassenlärm
+  - schalldichte Fenster
+  - keine Fluglärm
+  - seriöse ruhige Lage
+  - ganz ruhig
+  - kei Lärm idä Nacht
+  - stilli Umgäbig
+view_quality_score:
+  - apartment with a view
+  - panoramic mountain view
+  - lake view from rooftop
+  - stunning city skyline
+  - Wohnung mit schöner Aussicht
+  - Seesicht
+  - Bergblick
+  - Weitblick über die Stadt
+  - super Ussicht uf d Alpe
+  - Zürisee Blick
+  - mer gseht d Berge
+green_view_ratio:
+  - near nature and parks
+  - overlooking a garden
+  - green surroundings
+  - forest nearby
+  - In der Nähe von Parks und Grünflächen
+  - Gartenanteil
+  - Blick ins Grüne
+  - Naturnah
+  - nöch a dr Natur
+  - mer gseht Bäum und Gras
+  - bi de Allemände
+walkability_score:
+  - close to shops and groceries
+  - central location near amenities
+  - walkable distance to pharmacy
+  - Einkaufsmöglichkeiten zu Fuss erreichbar
+  - zentrale Lage
+  - Migros Coop in der Nähe
+  - Gute Inchauschance
+  - mer cha alles z Fuäss mache
+  - nöch bim Coop
+public_transport_score:
+  - near public transport tram train
+  - good connection to city center
+  - short walk to station
+  - Gute Anbindung an ÖV
+  - Bahnhof in der Nähe
+  - Tramhaltestelle vor der Tür
+  - nöch bi de Tramstation
+  - S-Bahn Aaschluss
+  - gueti Verbindig
+interior_modernity:
+  - modern high-end interior
+  - newly renovated finishings
+  - dishwasher and washing machine
+  - luxury kitchen
+  - Moderne hochwertige Innenausstattung
+  - Erstbezug nach Sanierung
+  - Geschirrspüler vorhanden
+  - modärni Chuchi
+  - alles neu renoviert
+  - luxuriösi Usstattig
+  - Abwäschmaschine
+work_from_home_fitness:
+  - home office with high speed internet
+  - quiet for focused work
+  - fiber optic connection
+  - Idealer Arbeitsplatz für Home Office
+  - Glasfaseranschluss
+  - schnelles Internet
+  - home office tauglich
+  - guets WLAN
+  - schnells Netz
+spaciousness_perception:
+  - large rooms high ceilings
+  - generous floor plan
+  - airy atmosphere
+  - open living surface
+  - Grosszügige Zimmer
+  - hohe Decken
+  - offener Grundriss
+  - viel Platz
+  - groissi Zimmer
+  - luftig
+  - grosszuegigs Wohnzimmer
+neighborhood_safety_score:
+  - safe family friendly area
+  - kids playing outside
+  - low crime neighborhood
+  - schools and kindergartens nearby
+  - Sicheres familienfreundliches Wohnquartier
+  - verkehrsberuhigte Zone
+  - Schule in der Nähe
+  - guet für Chind
+  - sicher zum Spiele
+  - familiefründlich
+proximity_to_desired_location_score:
+  - close to specific destination
+  - near university
+  - walking distance to workplace
+  - 15 minutes from city center
+  - In der Nähe vom Zielort
+  - kurzer Arbeitsweg
+  - Uni Nähe
+  - nöch bi de Arbet
+  - schnäll bi de Uni
+  - öppe 10 minete vo de Stadt
