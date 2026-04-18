@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import abstractmethod, ABC
 from typing import Any
-import json
 from sentence_transformers import SentenceTransformer, util
 import yaml
 import os
@@ -103,7 +102,7 @@ class LLMSoftExtractor(SoftFactExtractor):
         weights_dict = {}
 
         # Intensity multiplier: 1.0 for neutral queries, > 1.0 when strong importance
-        # keywords are detected (e.g. "must", "essential"). Never flips sign.
+        # keywords are detected (e.g. "muss", "essential"). Never flips sign.
         intensity = 1.0
         for val, keywords in self.importance_keywords.get("amplify", {}).items():
             if any(k in q_lower for k in keywords):
