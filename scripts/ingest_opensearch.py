@@ -27,7 +27,7 @@ from omegaconf import OmegaConf
 from app.ingestion.components.client import OpenSearchClient
 from app.ingestion.components import IngestionManager, build_augmenters
 
-load_dotenv()
+load_dotenv(override=True)
 
 _REPO_ROOT = Path(__file__).parent.parent
 _CFG_DIR = _REPO_ROOT / "configs" / "ingestion"

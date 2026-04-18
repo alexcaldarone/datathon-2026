@@ -21,6 +21,10 @@ _QUERY = """
 """
 
 
+def _is_complete(doc: dict, fields: list[str]) -> bool:
+    return all(doc.get(f) not in (None, {}, [], "") for f in fields)
+
+
 class IngestionManager:
     def __init__(self, cfg: DictConfig, augmenters: list[Augmenter], client: OpenSearchClient):
         self.cfg = cfg
@@ -76,6 +80,10 @@ class IngestionManager:
 
                 if new_rows:
                     listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
+
+                    # download images once for the whole batch
+                    download_images_batch(listings, max_workers=int(self.cfg.get("embed_workers", 8)))
+
                     augmented: dict[str, list] = {}
                     for aug in self.augmenters:
                         features = aug.augment_batch(listings)
