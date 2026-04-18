@@ -6,3 +6,5 @@ index_name: "listings"
 pipeline_name: "hybrid-rrf-pipeline"
 rrf_rank_constant: 60
 default_batch: 200
+
+num_anchor: 16
