@@ -16,7 +16,7 @@ enable_image_embeddings: true
 enable_vlm_features: true
 enable_translation: true
 enable_geo_features: true
-enable_anchor_features: false
+enable_anchor_features: true
 
 anchor_model_id: "amazon.titan-embed-text-v2:0"
 anchor_embed_dim: 1024
