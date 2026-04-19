@@ -77,7 +77,10 @@ def _first_url_from_json(images_json: str | None) -> str | None:
     return None
 
 def resize_and_crop_image(image_bytes: bytes, width: int, height: int) -> bytes:
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    img = Image.open(io.BytesIO(image_bytes))
+    if img.mode in ("P", "PA") and "transparency" in img.info:
+        img = img.convert("RGBA")
+    img = img.convert("RGB")
     scale = max(width / img.width, height / img.height)
     img = img.resize((int(img.width * scale), int(img.height * scale)), Image.LANCZOS)
     left = (img.width - width) // 2

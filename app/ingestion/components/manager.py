@@ -131,13 +131,17 @@ class IngestionManager:
                         _logger.record_step_stats(aug.field_name, 0, len(rows_to_update))
                         continue
                     listings_for_aug = [listings_by_id[row["listing_id"]] for row in needed]
-                    with _logger.augmenter(aug.field_name):
-                        features = aug.augment_batch(listings_for_aug)
-                    computed[aug.field_name] = {
-                        needed[i]["listing_id"]: features[i].content
-                        for i in range(len(needed))
-                    }
-                    _logger.record_step_stats(aug.field_name, len(needed), len(rows_to_update) - len(needed))
+                    try:
+                        with _logger.augmenter(aug.field_name):
+                            features = aug.augment_batch(listings_for_aug)
+                        computed[aug.field_name] = {
+                            needed[i]["listing_id"]: features[i].content
+                            for i in range(len(needed))
+                        }
+                        _logger.record_step_stats(aug.field_name, len(needed), len(rows_to_update) - len(needed))
+                    except Exception as exc:
+                        _logger.error("Augmenter '%s' failed for batch %d — skipping field: %s", aug.field_name, batch_num, exc)
+                        _logger.record_step_stats(aug.field_name, 0, len(needed))
 
                 docs = self._build_docs(rows_to_update, listings_by_id, computed, existing)
                 ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)

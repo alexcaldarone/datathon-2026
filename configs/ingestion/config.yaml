@@ -20,12 +20,12 @@ enable_anchor_features: true
 
 anchor_model_id: "amazon.titan-embed-text-v2:0"
 anchor_embed_dim: 1024
-anchor_workers: 10
+anchor_workers: 100
 anchor_aggregation: "max"  # min | max | mean | median
 anchor_path: "configs/soft_extractor_anchors.yaml"
 anchor_cache_path: ".cache/anchors_embeddings.npz"
 
-index_name: "listings"
+index_name: "listings-prod"
 pipeline_name: "hybrid-rrf-pipeline"
 rrf_rank_constant: 60
 default_batch: 500

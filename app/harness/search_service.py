@@ -52,6 +52,7 @@ def query_from_text(
     hard_filter_limit = _resolve_target(cfg.hard_filter.target_candidates, limit)
     soft_filter_target = _resolve_target(cfg.soft_filter.target_candidates, limit)
     reranker_target = _resolve_target(cfg.reranker.target_candidates, limit)
+    logger.log_pipeline_config(cfg, hard_filter_limit, soft_filter_target, reranker_target)
 
     with logger.stage("extract_hard_facts"):
         hard_facts = extract_hard_facts(query)
@@ -94,6 +95,7 @@ def query_from_filters(
     cfg = Config.get_cfg()
     soft_filter_target = _resolve_target(cfg.soft_filter.target_candidates, limit)
     reranker_target = _resolve_target(cfg.reranker.target_candidates, limit)
+    logger.log_pipeline_config(cfg, limit, soft_filter_target, reranker_target)
 
     with logger.stage("extract_soft_facts"):
         soft_facts = extract_soft_facts("")

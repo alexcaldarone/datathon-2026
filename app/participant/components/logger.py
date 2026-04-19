@@ -4,11 +4,16 @@ import logging
 import logging.handlers
 import sys
 import time
+import yaml
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from omegaconf import DictConfig, OmegaConf
+
 from app.models.schemas import HardFilters, ValidationResult
+
+_INGESTION_CFG_PATH = Path(__file__).parents[3] / "configs" / "ingestion" / "config.yaml"
 
 _LOGS_DIR = Path(__file__).parent.parent.parent.parent / "logs"
 
@@ -94,6 +99,33 @@ class PipelineLogger:
             for i, r in enumerate(ranked)
         )
         self._logger.info("RANKED_RESULTS (%d)\n  %s", len(ranked), lines or "(none)")
+
+    def log_pipeline_config(
+        self,
+        cfg: DictConfig,
+        hard_filter_limit: int,
+        soft_filter_target: int,
+        reranker_target: int,
+    ) -> None:
+        with open(_INGESTION_CFG_PATH) as f:
+            ingestion_cfg = OmegaConf.create(yaml.safe_load(f))
+        index_name = ingestion_cfg.get("index_name", "<unknown>")
+        components = {
+            "query_validator": cfg.query_validator.class_name,
+            "hard_extractor": cfg.hard_extractor.class_name,
+            "soft_extractor": cfg.soft_extractor.class_name,
+            "soft_filter": cfg.soft_filter.class_name,
+            "reranker": cfg.reranker.class_name,
+        }
+        comp_lines = "\n  ".join(f"{k}: {v}" for k, v in components.items())
+        self._logger.info(
+            "PIPELINE_CONFIG\n  index: %s\n  %s\n  targets: hard_filter=%d  soft_filter=%d  reranker=%d",
+            index_name,
+            comp_lines,
+            hard_filter_limit,
+            soft_filter_target,
+            reranker_target,
+        )
 
     def log_pipeline_end(self, listing_count: int) -> None:
         self._logger.info("DONE  listings_returned=%d", listing_count)
