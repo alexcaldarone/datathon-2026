@@ -39,6 +39,13 @@ def _download_image(url: str, request_timeout_s: int) -> bytes | None:
         resp = requests.get(url, timeout=request_timeout_s)
         resp.raise_for_status()
         return resp.content
+    except requests.HTTPError as exc:
+        from app.ingestion.components.logger import IngestionLogger
+        if exc.response is not None and exc.response.status_code == 404:
+            IngestionLogger.get().record_image_not_found(url)
+        else:
+            IngestionLogger.get().warning("Image download failed for %s: %s", url, exc)
+        return None
     except Exception as exc:
         from app.ingestion.components.logger import IngestionLogger
         IngestionLogger.get().warning("Image download failed for %s: %s", url, exc)

@@ -29,6 +29,7 @@ class IngestionLogger:
         self._step_times: dict[str, list[float]] = {}
         self._step_stats: dict[str, dict[str, int]] = {}
         self._batch_times: list[float] = []
+        self._image_not_found: int = 0
 
         if self._logger.handlers:
             return
@@ -92,6 +93,10 @@ class IngestionLogger:
             batch_num, total_batches, elapsed, avg, eta_str,
         )
 
+    def record_image_not_found(self, url: str) -> None:
+        self._image_not_found += 1
+        self._logger.warning("Image not found (404) [total=%d]: %s", self._image_not_found, url)
+
     def info(self, msg: str, *args) -> None:
         self._logger.info(msg, *args)
 
@@ -103,8 +108,8 @@ class IngestionLogger:
 
     def summary(self, indexed: int, skipped: int, failed: int, elapsed: float) -> None:
         self._logger.info(
-            "SUMMARY  indexed=%d  skipped=%d  failed=%d  total=%d  elapsed=%.1fs",
-            indexed, skipped, failed, indexed + skipped + failed, elapsed,
+            "SUMMARY  indexed=%d  skipped=%d  failed=%d  total=%d  images_not_found=%d  elapsed=%.1fs",
+            indexed, skipped, failed, indexed + skipped + failed, self._image_not_found, elapsed,
         )
         if self._step_times:
             self._logger.info("STEP AVERAGES:")
