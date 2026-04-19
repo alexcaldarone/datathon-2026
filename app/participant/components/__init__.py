@@ -4,3 +4,4 @@ from .soft_filter import build_soft_filter
 from .reranker import build_reranker
 from .query_validator import build_query_validator
 from .utils import Config
+from .logger import PipelineLogger

@@ -5,6 +5,7 @@ from typing import Any
 
 from app.core.hard_filters import HardFilterParams, search_listings
 from app.models.schemas import HardFilters, ListingsResponse
+from app.participant.components import PipelineLogger
 from app.participant.hard_fact_extraction import extract_hard_facts
 from app.participant.query_validation import validate_query
 from app.participant.ranking import rank_listings
@@ -23,8 +24,15 @@ def query_from_text(
     limit: int,
     offset: int,
 ) -> ListingsResponse:
-    validation = validate_query(query)
+    logger = PipelineLogger.get()
+    logger.log_query_start(query, limit, offset)
+
+    with logger.stage("validate_query"):
+        validation = validate_query(query)
+        logger.log_validation(validation)
+
     if not validation.is_valid:
+        logger.log_pipeline_end(0)
         return ListingsResponse(
             listings=[],
             meta={
@@ -33,16 +41,31 @@ def query_from_text(
                 "questions": validation.questions,
             },
         )
-    hard_facts = extract_hard_facts(query)
-    hard_facts.limit = limit
-    hard_facts.offset = offset
-    soft_facts = extract_soft_facts(query)
-    candidates = filter_hard_facts(db_path, hard_facts)
-    candidates = filter_soft_facts(candidates, soft_facts)
-    return ListingsResponse(
-        listings=rank_listings(candidates, soft_facts),
-        meta={},
-    )
+
+    with logger.stage("extract_hard_facts"):
+        hard_facts = extract_hard_facts(query)
+        hard_facts.limit = limit
+        hard_facts.offset = offset
+        logger.log_hard_facts(hard_facts)
+
+    with logger.stage("extract_soft_facts"):
+        soft_facts = extract_soft_facts(query)
+        logger.log_soft_facts(soft_facts)
+
+    with logger.stage("filter_hard_facts"):
+        candidates = filter_hard_facts(db_path, hard_facts)
+        logger.log_candidates("hard_filter", len(candidates))
+
+    with logger.stage("filter_soft_facts"):
+        candidates = filter_soft_facts(candidates, soft_facts)
+        logger.log_candidates("soft_filter", len(candidates))
+
+    with logger.stage("rank_listings"):
+        ranked = rank_listings(candidates, soft_facts)
+        logger.log_ranked_results(ranked)
+
+    logger.log_pipeline_end(len(ranked))
+    return ListingsResponse(listings=ranked, meta={})
 
 
 def query_from_filters(
@@ -50,14 +73,29 @@ def query_from_filters(
     db_path: Path,
     hard_facts: HardFilters | None,
 ) -> ListingsResponse:
+    logger = PipelineLogger.get()
     structured_hard_facts = hard_facts or HardFilters()
-    soft_facts = extract_soft_facts("")
-    candidates = filter_hard_facts(db_path, structured_hard_facts)
-    candidates = filter_soft_facts(candidates, soft_facts)
-    return ListingsResponse(
-        listings=rank_listings(candidates, soft_facts),
-        meta={},
-    )
+    logger.log_query_start("<filter_mode>", structured_hard_facts.limit, structured_hard_facts.offset)
+    logger.log_hard_facts(structured_hard_facts)
+
+    with logger.stage("extract_soft_facts"):
+        soft_facts = extract_soft_facts("")
+        logger.log_soft_facts(soft_facts)
+
+    with logger.stage("filter_hard_facts"):
+        candidates = filter_hard_facts(db_path, structured_hard_facts)
+        logger.log_candidates("hard_filter", len(candidates))
+
+    with logger.stage("filter_soft_facts"):
+        candidates = filter_soft_facts(candidates, soft_facts)
+        logger.log_candidates("soft_filter", len(candidates))
+
+    with logger.stage("rank_listings"):
+        ranked = rank_listings(candidates, soft_facts)
+        logger.log_ranked_results(ranked)
+
+    logger.log_pipeline_end(len(ranked))
+    return ListingsResponse(listings=ranked, meta={})
 
 
 def to_hard_filter_params(hard_facts: HardFilters) -> HardFilterParams:

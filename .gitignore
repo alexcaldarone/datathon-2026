@@ -7,6 +7,8 @@ __pycache__/
 raw_data/
 
 data/
+
+logs/
 *.db
 *.sqlite
 *.sqlite3
