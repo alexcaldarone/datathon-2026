@@ -54,15 +54,28 @@ class OpenSearchClient:
             self._client.indices.create(index=index, body=index_body)
         else:
             _logger.info("Index '%s' already exists — updating mapping.", index)
-            # Merge augmenter field mappings into the existing index so that
-            # fields added after initial creation (e.g. anchor_features) are
-            # explicitly mapped. Without this, strict-dynamic indices silently
-            # reject documents containing unmapped fields, making the
-            # incremental skip logic never recognise those fields as stored.
+            # Only add fields that are not yet in the current mapping.
+            # Sending the full body (including knn_vector fields) causes OpenSearch
+            # to reject the entire put_mapping request because knn_vector parameters
+            # cannot be changed after index creation — even when the definition is
+            # identical. That silent failure prevents new augmenter fields (e.g.
+            # vlm_features) from ever being mapped, so they remain invisible in the
+            # dashboard even though they are written to _source.
             try:
-                self._client.indices.put_mapping(
-                    index=index, body=index_body["mappings"]
-                )
+                current = self._client.indices.get_mapping(index=index)
+                existing_props = current[index]["mappings"].get("properties", {})
+                new_props = {
+                    k: v
+                    for k, v in index_body["mappings"]["properties"].items()
+                    if k not in existing_props
+                }
+                if new_props:
+                    self._client.indices.put_mapping(
+                        index=index, body={"properties": new_props}
+                    )
+                    _logger.info("Added %d new field mapping(s): %s", len(new_props), list(new_props))
+                else:
+                    _logger.info("Mapping already up-to-date — no new fields to add.")
             except Exception as exc:
                 _logger.warning("Mapping update failed (non-fatal): %s", exc)
         _logger.info("Upserting search pipeline '%s'...", pipeline)
