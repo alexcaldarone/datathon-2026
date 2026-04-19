@@ -10,7 +10,8 @@ hard_extractor:
   model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 
 soft_extractor:
-  class_name: DumbSoftExtractor
+  class_name: LLMSoftExtractor
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
   anchor_path: configs/soft_extractor_anchors.yaml
   importance_keywords_path: configs/soft_extractor_importance_keywords.yaml
 

@@ -75,7 +75,8 @@ class HybridSimilarityFilter(SoftFilter):
         if self._image_augmenter:
             image_vector = self._image_augmenter._embed_text(query_text)
 
-        boost_fields: list[str] = soft_facts.get("boost_fields", [])
+        boost_fields: list[tuple[str, float]] = soft_facts.get("boost_fields", [])
+        query_text_en: str | None = soft_facts.get("_query_en")
 
         resp = self._client.search(
             index=self._index,
@@ -86,6 +87,7 @@ class HybridSimilarityFilter(SoftFilter):
                 listing_ids=listing_ids,
                 image_vector=image_vector,
                 boost_fields=boost_fields,
+                query_text_en=query_text_en,
             ),
             pipeline=self._pipeline,
         )
@@ -106,7 +108,8 @@ class HybridSimilarityFilter(SoftFilter):
         sparse_weights: dict[str, float],
         listing_ids: list[str],
         image_vector: list[float] | None = None,
-        boost_fields: list[str] | None = None,
+        boost_fields: list[tuple[str, float]] | None = None,
+        query_text_en: str | None = None,
     ) -> dict:
         n = len(listing_ids)
         top_k = int(self.cfg.top_k)
@@ -121,13 +124,19 @@ class HybridSimilarityFilter(SoftFilter):
             }
         }
 
+        # BM25 on original-language fields
+        bm25_fields = ["full_text", "title", "description"]
+        if not query_text_en:
+            # no translation available — include full_text_en with the original query
+            bm25_fields.append("full_text_en")
+
         hybrid_queries = [
             {
                 "bool": {
                     "must": {
                         "multi_match": {
                             "query": query_text,
-                            "fields": ["full_text", "title", "description", "full_text_en"],
+                            "fields": bm25_fields,
                         }
                     },
                     "filter": candidate_filter,
@@ -145,6 +154,20 @@ class HybridSimilarityFilter(SoftFilter):
             },
             sparse_query,
         ]
+
+        # add translated-query BM25 sub-query for cross-language matching
+        if query_text_en:
+            hybrid_queries.append({
+                "bool": {
+                    "must": {
+                        "multi_match": {
+                            "query": query_text_en,
+                            "fields": ["full_text_en", "full_text", "title", "description"],
+                        }
+                    },
+                    "filter": candidate_filter,
+                }
+            })
 
         # add image kNN sub-query when multimodal embeddings are available
         if image_vector:
@@ -165,9 +188,10 @@ class HybridSimilarityFilter(SoftFilter):
                         "field": field,
                         "modifier": "log1p",
                         "missing": 5,
-                    }
+                    },
+                    "weight": weight,
                 }
-                for field in boost_fields
+                for field, weight in boost_fields
             ]
             hybrid_queries.append({
                 "function_score": {
