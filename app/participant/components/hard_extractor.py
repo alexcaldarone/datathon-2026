@@ -28,7 +28,7 @@ class HardFactExtractor(ABC):
     def run(self, query: str) -> HardFilters:
         pass
 
-class DumbHardExtractor(HardFactExtractor):
+class DumbHardFactExtractor(HardFactExtractor):
     def run(self, _query: str) -> HardFilters:
         return HardFilters()
 
@@ -45,7 +45,3 @@ class LLMHardFactExtractor(HardFactExtractor):
     def run(self, query: str) -> HardFilters:
         result = self._agent.run_sync(query)
         return result.output
-
-class DumbHardExtractor(HardFactExtractor):
-    def run(self, _query: str) -> HardFilters:
-        return HardFilters()

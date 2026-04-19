@@ -28,4 +28,4 @@ anchor_cache_path: ".cache/anchors_embeddings.npz"
 index_name: "listings-test-augmenters"
 pipeline_name: "hybrid-rrf-pipeline"
 rrf_rank_constant: 60
-default_batch: 200
+default_batch: 500
