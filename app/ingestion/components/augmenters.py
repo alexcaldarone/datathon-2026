@@ -2,6 +2,7 @@ import base64
 import json
 import math
 import re
+import threading
 import time
 import os
 from abc import ABC, abstractmethod
@@ -9,10 +10,10 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import Enum
 from typing import Any
-
 import boto3
+import numpy as np
 import requests
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseModel
 
 
@@ -27,6 +28,8 @@ def build_augmenters(cfg: DictConfig) -> list["Augmenter"]:
         augmenters.append(TranslationAugmenter(cfg))
     if cfg.get("enable_geo_features", False):
         augmenters.append(GeoFeatureAugmenter(cfg))
+    if cfg.get("enable_anchor_features", False):
+        augmenters.append(AnchorsAugmenter(cfg))
     return augmenters
 
 
@@ -247,22 +250,6 @@ class ImageEmbeddingAugmenter(Augmenter):
 # VLM Feature Augmenter
 # ---------------------------------------------------------------------------
 
-_VLM_SYSTEM_PROMPT = """\
-You are a real estate image analyst. Given a property listing image, rate the \
-following on a scale of 0-10 (null if not assessable from this image):
-
-- brightness: natural light, window size, sun exposure
-- spaciousness: room size, ceiling height, open-plan feel
-- modernity: quality of fixtures, finishes, renovation state
-- view_quality: what's visible from windows (0=wall/nothing, 10=panoramic alps/lake)
-- greenery: visible trees, parks, gardens
-- kitchen_quality: appliance quality, surfaces, layout (null if kitchen not shown)
-- condition: maintenance state, wear and tear
-- noise_impression: visual cues for quiet (0=busy road visible, 10=quiet residential)
-
-Return ONLY valid JSON: {"brightness": 7, "spaciousness": 5, ...}
-"""
-
 _VLM_FEATURE_KEYS = [
     "brightness", "spaciousness", "modernity", "view_quality",
     "greenery", "kitchen_quality", "condition", "noise_impression",
@@ -275,7 +262,9 @@ class VLMFeatureAugmenter(Augmenter):
         super().__init__(cfg)
         self._bedrock = boto3.client("bedrock-runtime", region_name=os.environ["AWS_DEFAULT_REGION"])
         self._model_id = cfg.get("vlm_model_id", "anthropic.claude-3-haiku-20240307-v1:0")
-
+        from app.participant.components.utils import read_system_prompt  # lazy: avoids circular import
+        self.system_prompt = read_system_prompt(self.__class__.__name__)
+    
     @property
     def field_name(self) -> str:
         return "vlm_features"
@@ -316,7 +305,7 @@ class VLMFeatureAugmenter(Augmenter):
                     "role": "user",
                     "content": [
                         {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b64}},
-                        {"type": "text", "text": _VLM_SYSTEM_PROMPT},
+                        {"type": "text", "text": self.system_prompt},
                     ],
                 }
             ],
@@ -662,3 +651,126 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dlam = math.radians(lon2 - lon1)
     a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2) ** 2
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+# ---------------------------------------------------------------------------
+# Anchors Augmenter
+# ---------------------------------------------------------------------------
+
+_ANCHOR_AGGREGATIONS = {
+    "max": np.max,
+    "min": np.min,
+    "mean": np.mean,
+    "median": np.median,
+}
+
+
+class AnchorsAugmenter(Augmenter):
+
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+        self._bedrock = boto3.client("bedrock-runtime", region_name=os.environ["AWS_DEFAULT_REGION"])
+        self._model_id = cfg.get("anchor_model_id", "amazon.titan-embed-text-v2:0")
+        self._embed_dim = int(cfg.get("anchor_embed_dim", 1024))
+        self._workers = int(cfg.get("anchor_workers", 10))
+        self._agg_fn = cfg.get("anchor_aggregation", "max")
+        self._anchor_path = cfg.get("anchor_path", "configs/soft_extractor_anchors.yaml")
+        self._cache_path = cfg.get("anchor_cache_path", ".cache/anchors_embeddings.npz")
+        self._anchors: dict[str, list[str]] = OmegaConf.to_container(OmegaConf.load(self._anchor_path))  # type: ignore[assignment]
+        self._cache_lock = threading.Lock()
+        self._embedding_cache: dict[str, np.ndarray] = self._load_cache()
+        # pre-embed all anchor sentences at startup (uses cache when available)
+        self._anchor_embeddings: dict[str, np.ndarray] = self._build_anchor_embeddings()
+
+    @property
+    def field_name(self) -> str:
+        return "anchor_features"
+
+    @property
+    def feature_type(self) -> FeatureType:
+        return FeatureType.SPARSE
+
+    @property
+    def field_mapping(self) -> dict:
+        return {
+            "type": "object",
+            "properties": {name: {"type": "float"} for name in self._anchors},
+        }
+
+    def augment(self, listing: dict) -> AugmentedFeature:
+        text_emb = np.array(self._embed(listing["full_text"]))
+        scores = self._score(text_emb)
+        return AugmentedFeature(name=self.field_name, type=self.feature_type, content=scores)
+
+    def augment_batch(self, listings: list[dict]) -> list[AugmentedFeature]:
+        results: list[AugmentedFeature | None] = [None] * len(listings)
+        with ThreadPoolExecutor(max_workers=self._workers) as pool:
+            futures = {pool.submit(self.augment, l): i for i, l in enumerate(listings)}
+            for fut in as_completed(futures):
+                results[futures[fut]] = fut.result()
+        return results  # type: ignore[return-value]
+
+    def _load_cache(self) -> dict[str, np.ndarray]:
+        if not os.path.exists(self._cache_path):
+            return {}
+        data = np.load(self._cache_path, allow_pickle=True)
+        return dict(zip(data["sentences"].tolist(), data["embeddings"]))
+
+    def _save_cache(self) -> None:
+        sentences = list(self._embedding_cache.keys())
+        embeddings = np.array([self._embedding_cache[s] for s in sentences])
+        np.savez_compressed(
+            self._cache_path,
+            sentences=np.array(sentences, dtype=object),
+            embeddings=embeddings,
+        )
+
+    def _build_anchor_embeddings(self) -> dict[str, np.ndarray]:
+        all_sentences = [s for sentences in self._anchors.values() for s in sentences]
+        missing = [s for s in all_sentences if s not in self._embedding_cache]
+
+        if missing:
+            fresh: dict[str, np.ndarray] = {}
+            with ThreadPoolExecutor(max_workers=self._workers) as pool:
+                futures = {pool.submit(self._embed, s): s for s in missing}
+                for fut in as_completed(futures):
+                    sentence = futures[fut]
+                    fresh[sentence] = np.array(fut.result())
+            with self._cache_lock:
+                self._embedding_cache.update(fresh)
+                self._save_cache()
+
+        return {
+            name: np.stack([self._embedding_cache[s] for s in sentences])
+            for name, sentences in self._anchors.items()
+        }
+
+    def _embed(self, text: str, retries: int = 3) -> list[float]:
+        payload = json.dumps({"inputText": text, "dimensions": self._embed_dim, "normalize": True})
+        for attempt in range(retries):
+            try:
+                resp = self._bedrock.invoke_model(
+                    modelId=self._model_id,
+                    body=payload,
+                    contentType="application/json",
+                    accept="application/json",
+                )
+                return json.loads(resp["body"].read())["embedding"]
+            except Exception as exc:
+                if attempt == retries - 1:
+                    raise
+                wait = 2 ** attempt
+                print(f"\nAnchor embedding error (attempt {attempt + 1}): {exc}. Retrying in {wait}s...")
+                time.sleep(wait)
+        return []
+
+    def _score(self, text_emb: np.ndarray) -> dict[str, float]:
+        # dot product = cosine similarity since Bedrock normalizes embeddings (normalize=True)
+        agg = _ANCHOR_AGGREGATIONS.get(self._agg_fn)
+        if agg is None:
+            raise ValueError(f"Unknown anchor_aggregation '{self._agg_fn}'. Choose from: {list(_ANCHOR_AGGREGATIONS)}")
+        return {
+            name: float(agg(anchor_embs @ text_emb))
+            for name, anchor_embs in self._anchor_embeddings.items()
+        }
+

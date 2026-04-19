@@ -2,10 +2,12 @@ import io
 import json
 import os
 
+import numpy as np
 from omegaconf import OmegaConf
 
 from app.ingestion.components.augmenters import (
     AugmentedFeature,
+    AnchorsAugmenter,
     FeatureType,
     GeoFeatureAugmenter,
     TranslationAugmenter,
@@ -269,6 +271,150 @@ def test_build_augmenters_all_enabled(monkeypatch) -> None:
     assert len(augmenters) == 6
 
 
+# ---------------------------------------------------------------------------
+# Anchors Augmenter
+# ---------------------------------------------------------------------------
+
+_FAKE_ANCHORS_YAML = """\
+daylight_score:
+  - helle Wohnung mit viel Tageslicht
+  - lichtdurchflutete Raeume
+noise_level:
+  - ruhiges Wohnquartier ohne Strassenlaerm
+  - stille Umgebung sehr wichtig
+"""
+
+_UNIT_EMBEDDING = [1.0] + [0.0] * 1023  # normalized unit vector along first axis
+
+
+class FakeBedrockAnchor:
+    def invoke_model(self, **kwargs) -> dict:
+        body = json.dumps({"embedding": _UNIT_EMBEDDING})
+        return {"body": io.BytesIO(body.encode())}
+
+
+def _anchor_cfg(tmp_path) -> dict:
+    anchor_file = tmp_path / "anchors.yaml"
+    anchor_file.write_text(_FAKE_ANCHORS_YAML)
+    cache_file = tmp_path / "anchors_embeddings.npz"
+    return {
+        **_base_cfg(),
+        "anchor_model_id": "amazon.titan-embed-text-v2:0",
+        "anchor_embed_dim": 1024,
+        "anchor_workers": 2,
+        "anchor_aggregation": "max",
+        "anchor_path": str(anchor_file),
+        "anchor_cache_path": str(cache_file),
+    }
+
+
+def test_anchors_augmenter_returns_scores(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
+    monkeypatch.setattr(
+        "app.ingestion.components.augmenters.boto3.client",
+        lambda *a, **kw: FakeBedrockAnchor(),
+    )
+
+    cfg = OmegaConf.create(_anchor_cfg(tmp_path))
+    augmenter = AnchorsAugmenter(cfg)
+
+    result = augmenter.augment({"full_text": "helle Wohnung mit viel Tageslicht"})
+
+    assert isinstance(result, AugmentedFeature)
+    assert result.name == "anchor_features"
+    assert result.type == FeatureType.SPARSE
+    assert set(result.content.keys()) == {"daylight_score", "noise_level"}
+    for v in result.content.values():
+        assert isinstance(v, float)
+
+
+def test_anchors_augmenter_field_mapping(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
+    monkeypatch.setattr(
+        "app.ingestion.components.augmenters.boto3.client",
+        lambda *a, **kw: FakeBedrockAnchor(),
+    )
+
+    cfg = OmegaConf.create(_anchor_cfg(tmp_path))
+    augmenter = AnchorsAugmenter(cfg)
+    mapping = augmenter.field_mapping
+
+    assert mapping["type"] == "object"
+    assert mapping["properties"]["daylight_score"]["type"] == "float"
+    assert mapping["properties"]["noise_level"]["type"] == "float"
+
+
+def test_anchors_augmenter_cache_is_written_and_reused(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
+    call_count = {"n": 0}
+
+    class CountingBedrock:
+        def invoke_model(self, **kwargs) -> dict:
+            call_count["n"] += 1
+            return {"body": io.BytesIO(json.dumps({"embedding": _UNIT_EMBEDDING}).encode())}
+
+    monkeypatch.setattr(
+        "app.ingestion.components.augmenters.boto3.client",
+        lambda *a, **kw: CountingBedrock(),
+    )
+
+    cfg = OmegaConf.create(_anchor_cfg(tmp_path))
+    # first init — embeds all anchor sentences + one for augment
+    aug1 = AnchorsAugmenter(cfg)
+    calls_after_init = call_count["n"]
+
+    # second init — cache is warm, no Bedrock calls for anchors
+    call_count["n"] = 0
+    aug2 = AnchorsAugmenter(cfg)
+    assert call_count["n"] == 0, "Second init should use cache, not call Bedrock"
+
+
+def test_anchors_augmenter_aggregation_max_vs_mean(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
+
+    # return different embeddings per sentence to make max ≠ mean observable
+    emb_index = {"i": 0}
+    embeddings = [
+        [1.0] + [0.0] * 1023,   # high similarity
+        [0.0, 1.0] + [0.0] * 1022,  # zero similarity with query
+    ]
+
+    class VaryingBedrock:
+        def invoke_model(self, **kwargs) -> dict:
+            emb = embeddings[emb_index["i"] % len(embeddings)]
+            emb_index["i"] += 1
+            return {"body": io.BytesIO(json.dumps({"embedding": emb}).encode())}
+
+    monkeypatch.setattr(
+        "app.ingestion.components.augmenters.boto3.client",
+        lambda *a, **kw: VaryingBedrock(),
+    )
+
+    # max aggregation
+    cfg_max = OmegaConf.create({**_anchor_cfg(tmp_path), "anchor_aggregation": "max"})
+    emb_index["i"] = 0
+    aug_max = AnchorsAugmenter(cfg_max)
+    emb_index["i"] = 0  # reset so query uses first embedding
+    result_max = aug_max.augment({"full_text": "helle Wohnung"})
+
+    # mean aggregation on a fresh cache path
+    tmp_path2 = tmp_path / "mean"
+    tmp_path2.mkdir()
+    cfg_mean = OmegaConf.create({
+        **_anchor_cfg(tmp_path),
+        "anchor_aggregation": "mean",
+        "anchor_cache_path": str(tmp_path2 / "cache.npz"),
+    })
+    emb_index["i"] = 0
+    aug_mean = AnchorsAugmenter(cfg_mean)
+    emb_index["i"] = 0
+    result_mean = aug_mean.augment({"full_text": "helle Wohnung"})
+
+    # max should be >= mean (max picks best matching sentence)
+    for key in result_max.content:
+        assert result_max.content[key] >= result_mean.content[key]
+
+
 def test_build_augmenters_none_extra_enabled(monkeypatch) -> None:
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
     monkeypatch.setattr(
@@ -285,3 +431,27 @@ def test_build_augmenters_none_extra_enabled(monkeypatch) -> None:
     augmenters = build_augmenters(cfg)
 
     assert len(augmenters) == 2
+
+
+def test_build_augmenters_with_anchors(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-central-2")
+    monkeypatch.setattr(
+        "app.ingestion.components.augmenters.boto3.client",
+        lambda *a, **kw: FakeBedrockAnchor(),
+    )
+
+    raw = {
+        **_base_cfg(),
+        **_anchor_cfg(tmp_path),
+        "enable_anchor_features": True,
+        "enable_image_embeddings": False,
+        "enable_vlm_features": False,
+        "enable_translation": False,
+        "enable_geo_features": False,
+    }
+    cfg = OmegaConf.create(raw)
+    augmenters = build_augmenters(cfg)
+
+    # DenseEmbeddingAugmenter + BM25SparseAugmenter + AnchorsAugmenter
+    assert len(augmenters) == 3
+    assert any(isinstance(a, AnchorsAugmenter) for a in augmenters)
