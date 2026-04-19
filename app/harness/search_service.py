@@ -6,6 +6,7 @@ from typing import Any
 from app.core.hard_filters import HardFilterParams, search_listings
 from app.models.schemas import HardFilters, ListingsResponse
 from app.participant.components import Config, PipelineLogger
+from app.participant.components.utils import read_system_prompt
 from app.participant.hard_fact_extraction import extract_hard_facts
 from app.participant.query_validation import validate_query
 from app.participant.ranking import rank_listings
@@ -21,6 +22,21 @@ def _resolve_target(target: int | float, limit: int) -> int:
 
 def filter_hard_facts(db_path: Path, hard_facts: HardFilters) -> list[dict[str, Any]]:
     return search_listings(db_path, to_hard_filter_params(hard_facts))
+
+
+def _check_empty_candidates(
+    candidates: list[dict[str, Any]], logger: PipelineLogger
+) -> ListingsResponse | None:
+    if candidates:
+        return None
+    logger.log_pipeline_end(0)
+    return ListingsResponse(
+        listings=[],
+        meta={
+            "status": "no_results",
+            "message": read_system_prompt("no_candidates"),
+        },
+    )
 
 
 def query_from_text(
@@ -60,18 +76,24 @@ def query_from_text(
         hard_facts.offset = offset
         logger.log_hard_facts(hard_facts)
 
-    with logger.stage("extract_soft_facts"):
-        soft_facts = extract_soft_facts(query)
-        logger.log_soft_facts(soft_facts)
-
     with logger.stage("filter_hard_facts"):
         candidates = filter_hard_facts(db_path, hard_facts)
         logger.log_candidates("hard_filter", len(candidates))
+
+    if (early_stop := _check_empty_candidates(candidates, logger)) is not None:
+        return early_stop
+
+    with logger.stage("extract_soft_facts"):
+        soft_facts = extract_soft_facts(query)
+        logger.log_soft_facts(soft_facts)
 
     if len(candidates) > soft_filter_target:
         with logger.stage("filter_soft_facts"):
             candidates = filter_soft_facts(candidates, soft_facts, soft_filter_target)
             logger.log_candidates("soft_filter", len(candidates))
+
+        if (early_stop := _check_empty_candidates(candidates, logger)) is not None:
+            return early_stop
 
     with logger.stage("rank_listings"):
         ranked = rank_listings(candidates, soft_facts, reranker_target)
@@ -97,18 +119,24 @@ def query_from_filters(
     reranker_target = _resolve_target(cfg.reranker.target_candidates, limit)
     logger.log_pipeline_config(cfg, limit, soft_filter_target, reranker_target)
 
-    with logger.stage("extract_soft_facts"):
-        soft_facts = extract_soft_facts("")
-        logger.log_soft_facts(soft_facts)
-
     with logger.stage("filter_hard_facts"):
         candidates = filter_hard_facts(db_path, structured_hard_facts)
         logger.log_candidates("hard_filter", len(candidates))
+
+    if (early_stop := _check_empty_candidates(candidates, logger)) is not None:
+        return early_stop
+
+    with logger.stage("extract_soft_facts"):
+        soft_facts = extract_soft_facts("")
+        logger.log_soft_facts(soft_facts)
 
     if len(candidates) > soft_filter_target:
         with logger.stage("filter_soft_facts"):
             candidates = filter_soft_facts(candidates, soft_facts, soft_filter_target)
             logger.log_candidates("soft_filter", len(candidates))
+
+        if (early_stop := _check_empty_candidates(candidates, logger)) is not None:
+            return early_stop
 
     with logger.stage("rank_listings"):
         ranked = rank_listings(candidates, soft_facts, reranker_target)
