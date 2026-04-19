@@ -53,7 +53,18 @@ class OpenSearchClient:
             _logger.info("Creating index '%s'...", index)
             self._client.indices.create(index=index, body=index_body)
         else:
-            _logger.info("Index '%s' already exists — skipping creation.", index)
+            _logger.info("Index '%s' already exists — updating mapping.", index)
+            # Merge augmenter field mappings into the existing index so that
+            # fields added after initial creation (e.g. anchor_features) are
+            # explicitly mapped. Without this, strict-dynamic indices silently
+            # reject documents containing unmapped fields, making the
+            # incremental skip logic never recognise those fields as stored.
+            try:
+                self._client.indices.put_mapping(
+                    index=index, body=index_body["mappings"]
+                )
+            except Exception as exc:
+                _logger.warning("Mapping update failed (non-fatal): %s", exc)
         _logger.info("Upserting search pipeline '%s'...", pipeline)
         self._client.transport.perform_request(
             "PUT", f"/_search/pipeline/{pipeline}", body=pipeline_body
