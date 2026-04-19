@@ -23,7 +23,9 @@ _QUERY = """
 
 
 def _is_complete(doc: dict, fields: list[str]) -> bool:
-    return all(doc.get(f) not in (None, {}, [], "") for f in fields)
+    # presence-only check: augmenter ran if the key exists, regardless of value
+    # (object-type fields like vlm_features may legitimately store {} on failure)
+    return all(f in doc for f in fields)
 
 
 class IngestionManager:
@@ -86,7 +88,10 @@ class IngestionManager:
             ]
             skipped += len(rows) - len(rows_to_update)
 
-            if rows_to_update:
+            if not rows_to_update:
+                for aug in self.augmenters:
+                    _logger.record_step_stats(aug.field_name, 0, len(rows))
+            else:
                 listings_by_id: dict[str, dict] = {
                     row["listing_id"]: dict(row) | {"full_text": row_to_full_text(row)}
                     for row in rows_to_update
