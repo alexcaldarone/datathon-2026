@@ -1,0 +1,11 @@
+### AWS challenge
+
+Our entire project is built upon AWS infrastructure. In particular:
+
+- `AWS OpenSearch` is used as a feature store where we perform soft filtering 
+
+- `AWS Bedrock` is extensively used for embedding the data and interacting with LLMs via the bedrock api
+
+- `AWS S3` for retrieving the listing imaged
+
+- `AWS CLoudWatch` was initially tried for logging

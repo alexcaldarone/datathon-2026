@@ -32,24 +32,6 @@ The hybrid soft filter fuses the following signals in OpenSearch:
 | Geo/amenity features | Transit stop counts, school and supermarket proximity, and three composite scores (transit, walkability, family) derived from OpenStreetMap data. |
 | Weighted preference boosting | An LLM-based soft extractor maps the query to 15 preference dimensions with importance weights (1.0 must / 0.7 preferred / 0.4 nice-to-have), which drive per-field `function_score` boosts on VLM and geo features. |
 
-### AWS challenge
-
-Our entire project is built upon AWS infrastructure. In particular:
-
-- `AWS OpenSearch` is used as a feature store where we perform soft filtering 
-
-- `AWS Bedrock` is extensively used for embedding the data and interacting with LLMs via the bedrock api
-
-- `AWS S3` for retrieving the listing imaged
-
-- `AWS CLoudWatch` was initially tried for logging
-
-### Anthropic/Claude challege
-
-Anthropic models were extensively used througout the project. In particular:
-
-- `Claude 3 Haiku` was used to extract the image VLM features, translation and LLM reranking. This was preferred over other model due to faster response times.
-
 ### Team Members
 
 - Alex Caldarone

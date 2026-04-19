@@ -1,0 +1,5 @@
+### Anthropic/Claude challege
+
+Anthropic models were extensively used througout the project. In particular:
+
+- `Claude 3 Haiku` was used to extract the image VLM features, translation and LLM reranking. This was preferred over other model due to faster response times.
