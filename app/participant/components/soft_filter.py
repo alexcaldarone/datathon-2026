@@ -43,9 +43,7 @@ class DumbSoftFilter(SoftFilter):
         return candidates[:target]
 
 
-class HybridSimilarityFilter(SoftFilter):
-    # top-N terms from sparse BM25 weights included in the rank_features query
-    _SPARSE_TOP_K: int = 30
+class AugmentorFilter(SoftFilter):
 
     def __init__(self, cfg: DictConfig):
         super().__init__(cfg)
@@ -54,6 +52,10 @@ class HybridSimilarityFilter(SoftFilter):
         self._pipeline = self.ingestion_cfg.pipeline_name
         self._augmenters = build_augmenters(self.ingestion_cfg)
         self._client = OpenSearchClient()  # singleton
+        # minimum query-anchor cosine similarity to include a dimension as a boost
+        self.anchor_threshold = cfg.anchor_threshold
+        # top-N terms from sparse BM25 weights included in the rank_features query
+        self.sparse_k_for_scoring: int = 30
 
     def run(
         self,
@@ -86,9 +88,14 @@ class HybridSimilarityFilter(SoftFilter):
 
         # Boost fields
         boost_fields: list[tuple[str, float]] | None = soft_facts.get("boost_fields") if cfg.get("enable_boost_fields", True) else None
-        
+
         # Translated queries
         query_text_en: str | None = soft_facts.get("_query_en") if cfg.get("enable_query_text_en", True) else None
+
+        # Anchor scores: cosine similarity of query to each anchor dimension
+        anchor_scores: dict[str, float] | None = (
+            features.get("anchor_features") if cfg.get("enable_anchor_features", True) else None
+        )
 
         _log = PipelineLogger.get()._logger
         active = [name for name, val in [
@@ -97,6 +104,7 @@ class HybridSimilarityFilter(SoftFilter):
             ("image_vector", image_vector),
             ("boost_fields", boost_fields),
             ("query_text_en", query_text_en),
+            ("anchor_scores", anchor_scores),
         ] if val]
         _log.info("SOFT_FILTER  active_fields=%s", active)
 
@@ -110,6 +118,7 @@ class HybridSimilarityFilter(SoftFilter):
                 image_vector=image_vector,
                 boost_fields=boost_fields,
                 query_text_en=query_text_en,
+                anchor_scores=anchor_scores,
                 target=target,
             ),
             pipeline=self._pipeline,
@@ -133,6 +142,7 @@ class HybridSimilarityFilter(SoftFilter):
         image_vector: list[float] | None = None,
         boost_fields: list[tuple[str, float]] | None = None,
         query_text_en: str | None = None,
+        anchor_scores: dict[str, float] | None = None,
     ) -> dict:
         n = len(listing_ids)
         candidate_filter = {"terms": {"listing_id": listing_ids}}
@@ -171,7 +181,7 @@ class HybridSimilarityFilter(SoftFilter):
 
         if sparse_weights:
             # top-N sparse terms by BM25 weight; rank_feature (singular) is the query type
-            top_terms = sorted(sparse_weights.items(), key=lambda x: -x[1])[:self._SPARSE_TOP_K]
+            top_terms = sorted(sparse_weights.items(), key=lambda x: -x[1])[:self.sparse_k_for_scoring]
             hybrid_queries.append({
                 "bool": {
                     "should": [{"rank_feature": {"field": f"sparse_embedding.{t}"}} for t, _ in top_terms],
@@ -225,6 +235,28 @@ class HybridSimilarityFilter(SoftFilter):
                     "score_mode": "sum",
                 }
             })
+
+        if anchor_scores:
+            boosted = {dim: score for dim, score in anchor_scores.items() if score >= self.anchor_threshold}
+            if boosted:
+                hybrid_queries.append({
+                    "function_score": {
+                        "query": {"bool": {"filter": candidate_filter}},
+                        "functions": [
+                            {
+                                "field_value_factor": {
+                                    "field": f"anchor_features.{dim}",
+                                    "modifier": "none",
+                                    "missing": 0,
+                                },
+                                "weight": score,
+                            }
+                            for dim, score in boosted.items()
+                        ],
+                        "boost_mode": "multiply",
+                        "score_mode": "sum",
+                    }
+                })
 
         return {
             # return target; post_filter guarantees results come from the candidate set

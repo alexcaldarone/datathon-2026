@@ -19,13 +19,16 @@ hard_filter:
   target_candidates: 200
 
 soft_filter:
-  class_name: HybridSimilarityFilter
+  class_name: AugmentorFilter
   target_candidates: 4.0
   enable_dense_vector: true
   enable_sparse_weights: true
   enable_image_vector: true
   enable_boost_fields: true
   enable_query_text_en: true
+  enable_anchor_features: true
+  anchor_threshold: 0.5
+  sparse_k_for_scoring: 30  # how many top BM25 features for scoring
 
 reranker:
   # class_name: CohereReRanker
