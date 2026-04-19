@@ -229,8 +229,6 @@ class AnchorsAugmenter(Augmenter):
     def _weights_to_vector(self, weights: SoftFactWeights) -> list[float]:
         return list(weights.model_dump().values())
 
-        
-
 class BM25SparseAugmenter(Augmenter):
     # BM25 parameters (standard defaults)
     _K1: float = 1.2

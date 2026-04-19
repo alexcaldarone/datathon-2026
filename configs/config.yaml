@@ -12,3 +12,6 @@ soft_filter:
 
 ranker:
   class_name: DumbRanker
+
+api_key_openrouteservice: "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjExZTNhODRlZmE1MjQ4ZmM5YzgzMmJkOTMzN2IxYzEwIiwiaCI6Im11cm11cjY0In0="
+profile: "driving-car" # {driving-car, cycling-regular, foot-walking}
