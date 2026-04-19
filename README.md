@@ -1,12 +1,20 @@
 # Datathon 2026 Challenge - Team 4
 
-### Description of implementation
+![Demo](assets/demo.gif)
 
 We built a multi-stage, multi-modal search pipeline that transforms natural language queries into ranked real estate listings for the Swiss market.
 
 Our hard retrieval stage uses an LLM orchestrator to extract hard requirements from the user's natual language query to perform a first coarse filtering of the listings.
 
 Our soft retrieval stage combines seven ranking signals: BM25 text search, dense semantic embeddings, sparse lexical features, image embeddings, visual-language model scores from listing images, geo and amenity-based neighborhood features, and weighted boosting based on user preference importance. These are fused using Reciprocal Rank Fusion to generate a robust candidate ranking.
+
+**Team 4 Members:**
+
+- [Alex Caldarone](https://www.linkedin.com/in/alexjohncaldarone/)
+
+- [Giacomo Ciro](https://www.giacomociro.com/)
+
+- [Joshua Gao](https://www.linkedin.com/in/joshua-gao-5ab7052b7/)
 
 ### System architecture
 
@@ -33,19 +41,35 @@ The hybrid soft filter fuses the following signals in OpenSearch:
 | Weighted preference boosting | An LLM-based soft extractor maps the query to 15 preference dimensions with importance weights (1.0 must / 0.7 preferred / 0.4 nice-to-have), which drive per-field `function_score` boosts on VLM and geo features. |
 | Anchor similarity scores | Pre-computed cosine similarity between each listing's text embedding and a fixed set of anchor phrases representing a feature dimension (e.g., daylight, noise level etc.)|
 
+### Cloud Infrastructure (AWS)
+
+The system is fully deployed on AWS:
+
+| Service | Role |
+|---|---|
+| AWS OpenSearch | Feature store for soft filtering — hosts dense/sparse embeddings, VLM scores, and geo features; serves the hybrid kNN + BM25 query at retrieval time. |
+| AWS Bedrock | LLM and embedding backend — powers dense text embeddings (Titan), multimodal image embeddings (Titan Multimodal), translation, VLM feature extraction, and reranking (Claude Haiku via Bedrock API). |
+| AWS S3 | Source of listing images, fetched on-demand during ingestion and served to the pipeline. |
+| AWS CloudWatch | Used during initial development for centralized logging. |
+
+### Anthropic Models
+
+Anthropic models were used extensively throughout the project:
+
+| Model | Usage |
+|---|---|
+| Claude 3 Haiku (via Bedrock) | VLM feature extraction from listing images, query/description translation to English, and LLM-based reranking. Chosen for its low-latency inference at scale. |
+| Claude Code | Primary development tool used to build and iterate on the entire codebase — from pipeline design to prompt engineering. |
+
+
 ### Public Endpoints
+
+> **Disclaimer:** The public endpoints below are only available for the duration of the AWS workshop event. Access may be revoked or endpoints may be shut down after the event concludes.
+
 
 - **MCP**: `https://formal-beautifully-gen-cancelled.trycloudflare.com/mcp`
 
 - **API**: `https://thy-operational-unlock-italic.trycloudflare.com/docs`
-
-### Team Members
-
-- Alex Caldarone
-
-- Giacomo Ciro
-
-- Joshua Gao
 
 ---
 
