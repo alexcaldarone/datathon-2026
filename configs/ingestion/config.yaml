@@ -1,12 +1,12 @@
 embed_dim: 1024
-embed_workers: 50
+embed_workers: 100
 model_id: "amazon.titan-embed-text-v2:0"
 image_model_id: "amazon.titan-embed-image-v1"
 vlm_model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 translation_model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 overpass_url: "https://overpass.osm.ch/api/"
-overpass_workers: 5
-upsert_workers: 50
+overpass_workers: 100
+upsert_workers: 100
 image_download_workers: 50
 image_request_timeout_s: 30
 image_width: 512
@@ -25,7 +25,7 @@ anchor_aggregation: "max"  # min | max | mean | median
 anchor_path: "configs/soft_extractor_anchors.yaml"
 anchor_cache_path: ".cache/anchors_embeddings.npz"
 
-index_name: "listings-test-augmenters"
+index_name: "listings"
 pipeline_name: "hybrid-rrf-pipeline"
 rrf_rank_constant: 60
 default_batch: 500
