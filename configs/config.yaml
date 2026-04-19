@@ -5,19 +5,19 @@ query_validator:
   class_name: LLMQueryValidator
   model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   # model_id: "amazon.nova-micro-v1:0"
-  # model_id: "anthropic.claude-3-5-haiku-20241022-v1:0"
+  # model_id: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
 hard_extractor:
   class_name: LLMHardFactExtractor
   # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   # model_id: "amazon.nova-micro-v1:0"
-  model_id: "anthropic.claude-3-5-haiku-20241022-v1:0"
+  model_id: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
 
 soft_extractor:
   class_name: LLMSoftExtractor
   # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   # model_id: "amazon.nova-micro-v1:0"
-  model_id: "anthropic.claude-3-5-haiku-20241022-v1:0"
+  model_id: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
   anchor_path: configs/soft_extractor_anchors.yaml
   importance_keywords_path: configs/soft_extractor_importance_keywords.yaml
 
@@ -43,6 +43,6 @@ reranker:
   # model_id: "us.anthropic.claude-sonnet-4-6"
   # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
   # model_id: "amazon.nova-micro-v1:0"
-  model_id: "anthropic.claude-3-5-haiku-20241022-v1:0"
+  model_id: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
   target_candidates: 10
   region: "us-east-1"
