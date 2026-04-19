@@ -27,6 +27,7 @@ class IngestionLogger:
         self._logger.setLevel(logging.DEBUG)
         self._logger.propagate = False
         self._step_times: dict[str, list[float]] = {}
+        self._step_stats: dict[str, dict[str, int]] = {}
         self._batch_times: list[float] = []
 
         if self._logger.handlers:
@@ -74,6 +75,12 @@ class IngestionLogger:
             "BATCH  [%d/%d]  offset=%d  size=%d", batch_num, total_batches, offset, size
         )
 
+    def record_step_stats(self, name: str, updated: int, skipped: int) -> None:
+        entry = self._step_stats.setdefault(name, {"updated": 0, "skipped": 0})
+        entry["updated"] += updated
+        entry["skipped"] += skipped
+        self._logger.info("STEP STATS   [%s]  updated=%d  skipped=%d", name, updated, skipped)
+
     def batch_done(self, batch_num: int, total_batches: int, elapsed: float) -> None:
         self._batch_times.append(elapsed)
         avg = sum(self._batch_times) / len(self._batch_times)
@@ -103,4 +110,10 @@ class IngestionLogger:
             self._logger.info("STEP AVERAGES:")
             for step, times in self._step_times.items():
                 avg = sum(times) / len(times)
-                self._logger.info("  %-30s  avg=%.3fs  runs=%d", step, avg, len(times))
+                stats = self._step_stats.get(step, {})
+                updated = stats.get("updated", 0)
+                skipped = stats.get("skipped", 0)
+                self._logger.info(
+                    "  %-30s  avg=%.3fs  runs=%d  updated=%d  skipped=%d",
+                    step, avg, len(times), updated, skipped,
+                )

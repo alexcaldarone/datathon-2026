@@ -7,11 +7,7 @@ A minimal harness for a Datathon challenge focused on building a high-quality li
 * **Install Dependencies:** `uv sync --dev`
 * **Run API:** `uv run uvicorn app.main:app --reload --port 8000`
 * **Run MCP Server:** `uv run uvicorn apps_sdk.server.main:app --reload --port 8001`
-* **Build Widget:** `cd apps_sdk/web && npm install && npm run build`
 * **Run Tests:** `uv run pytest tests -q`
-* **Docker:** `docker compose up --build`
-* **Ingest OpenSearch (dry run):** `OPENSEARCH_ENDPOINT=<host> uv run python scripts/ingest_opensearch.py --dry-run`
-* **Ingest OpenSearch (full):** `OPENSEARCH_ENDPOINT=<host> uv run python scripts/ingest_opensearch.py --reset`
 
 ## Extension Points (Edit These)
 Core participant logic resides in `app/participant/`:
@@ -33,17 +29,6 @@ Core participant logic resides in `app/participant/`:
 * **components:** the different components of the pipeline are contained in `app/participant/components`. At the top there is the build function, then the abstract interface, and eventually all the concrete implementation.
 * **system prompts:** prompts are for the {modelName} are stored in app/participant/prompts/{modelName}.md and should be loaded using the helper function `app/participant/components/utils.py:read_system_prompt()`
 
-## Environment Variables
-```bash
-# S3 Credentials for images
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
-export AWS_DEFAULT_REGION=eu-central-2
-
-# MCP / Tunneling
-export APPS_SDK_LISTINGS_API_BASE_URL=http://localhost:8000
-export APPS_SDK_PUBLIC_BASE_URL=https://<your-tunnel-url>
-```
 
 ## Coding Standard
 - Match the style and structure of the existing code inside `app/`.

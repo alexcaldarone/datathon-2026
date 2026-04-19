@@ -3,6 +3,7 @@ import math
 import sqlite3
 import time
 from pathlib import Path
+from typing import Any
 
 from omegaconf import DictConfig
 
@@ -77,31 +78,63 @@ class IngestionManager:
 
             ids = [row["listing_id"] for row in rows]
             existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
-            new_rows = [
+
+            # rows missing at least one augmenter field
+            rows_to_update = [
                 row for row in rows
                 if not _is_complete(existing.get(row["listing_id"], {}), augmenter_fields)
             ]
-            skipped += len(rows) - len(new_rows)
+            skipped += len(rows) - len(rows_to_update)
 
-            if new_rows:
-                listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
+            if rows_to_update:
+                listings_by_id: dict[str, dict] = {
+                    row["listing_id"]: dict(row) | {"full_text": row_to_full_text(row)}
+                    for row in rows_to_update
+                }
 
-                with _logger.stage("image_download"):
-                    download_images_batch(
-                        listings,
-                        max_workers=int(self.cfg.get("image_download_workers", 8)),
-                        request_timeout_s=self.cfg.image_request_timeout_s,
-                        target_width=self.cfg.get("image_width"),
-                        target_height=self.cfg.get("image_height"),
-                    )
+                # per-augmenter: which rows are missing this specific field
+                aug_needed_rows: dict[str, list] = {
+                    aug.field_name: [
+                        row for row in rows_to_update
+                        if not _is_complete(existing.get(row["listing_id"], {}), [aug.field_name])
+                    ]
+                    for aug in self.augmenters
+                }
 
-                augmented: dict[str, list] = {}
+                # download images only for rows that need an image-dependent augmenter
+                rows_needing_images: set[str] = {
+                    row["listing_id"]
+                    for aug in self.augmenters if aug.needs_images
+                    for row in aug_needed_rows[aug.field_name]
+                }
+                if rows_needing_images:
+                    with _logger.stage("image_download"):
+                        download_images_batch(
+                            [listings_by_id[lid] for lid in rows_needing_images],
+                            max_workers=int(self.cfg.get("image_download_workers", 8)),
+                            request_timeout_s=self.cfg.image_request_timeout_s,
+                            target_width=self.cfg.get("image_width"),
+                            target_height=self.cfg.get("image_height"),
+                        )
+                    _logger.record_step_stats("image_download", len(rows_needing_images), len(rows_to_update) - len(rows_needing_images))
+
+                # run each augmenter only on rows missing its field
+                computed: dict[str, dict[str, Any]] = {}  # field_name -> {listing_id -> value}
                 for aug in self.augmenters:
+                    needed = aug_needed_rows[aug.field_name]
+                    if not needed:
+                        _logger.record_step_stats(aug.field_name, 0, len(rows_to_update))
+                        continue
+                    listings_for_aug = [listings_by_id[row["listing_id"]] for row in needed]
                     with _logger.augmenter(aug.field_name):
-                        features = aug.augment_batch(listings)
-                    augmented[aug.field_name] = [f.content for f in features]
+                        features = aug.augment_batch(listings_for_aug)
+                    computed[aug.field_name] = {
+                        needed[i]["listing_id"]: features[i].content
+                        for i in range(len(needed))
+                    }
+                    _logger.record_step_stats(aug.field_name, len(needed), len(rows_to_update) - len(needed))
 
-                docs = self._build_docs(new_rows, listings, augmented)
+                docs = self._build_docs(rows_to_update, listings_by_id, computed, existing)
                 ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)
                 indexed += ok
                 failed += err
@@ -115,15 +148,18 @@ class IngestionManager:
     def _build_docs(
         self,
         rows: list[sqlite3.Row],
-        listings: list[dict],
-        augmented: dict[str, list],
+        listings_by_id: dict[str, dict],
+        computed: dict[str, dict[str, Any]],
+        existing: dict[str, dict],
     ) -> list[dict]:
         docs = []
-        for i, (row, listing) in enumerate(zip(rows, listings)):
+        for row in rows:
+            lid = row["listing_id"]
+            listing = listings_by_id[lid]
             doc = {
                 "_index":          self._index,
-                "_id":             row["listing_id"],
-                "listing_id":      row["listing_id"],
+                "_id":             lid,
+                "listing_id":      lid,
                 "full_text":       listing["full_text"],
                 "title":           row["title"],
                 "description":     row["description"],
@@ -142,7 +178,12 @@ class IngestionManager:
                 "images_urls":     parse_images_json(row["images_json"]),
                 "features":        parse_features(row["features_json"]),
             }
-            for field_name, contents in augmented.items():
-                doc[field_name] = contents[i]
+            for aug in self.augmenters:
+                field = aug.field_name
+                if lid in computed.get(field, {}):
+                    doc[field] = computed[field][lid]
+                elif field in existing.get(lid, {}):
+                    # preserve existing value to avoid overwriting with null on full re-index
+                    doc[field] = existing[lid][field]
             docs.append(doc)
         return docs

@@ -65,6 +65,10 @@ class Augmenter(ABC):
     @abstractmethod
     def field_mapping(self) -> dict: ...
 
+    @property
+    def needs_images(self) -> bool:
+        return False
+
     @abstractmethod
     def augment(self, listing: dict) -> AugmentedFeature: ...
 
@@ -186,6 +190,10 @@ class ImageEmbeddingAugmenter(Augmenter):
         self._model_id = cfg.get("image_model_id", "amazon.titan-embed-image-v1")
 
     @property
+    def needs_images(self) -> bool:
+        return True
+
+    @property
     def field_name(self) -> str:
         return "image_embedding"
 
@@ -268,7 +276,11 @@ class VLMFeatureAugmenter(Augmenter):
         self._model_id = cfg.get("vlm_model_id", "anthropic.claude-3-haiku-20240307-v1:0")
         from app.participant.components.utils import read_system_prompt  # lazy: avoids circular import
         self.system_prompt = read_system_prompt(self.__class__.__name__)
-    
+
+    @property
+    def needs_images(self) -> bool:
+        return True
+
     @property
     def field_name(self) -> str:
         return "vlm_features"
