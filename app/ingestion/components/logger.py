@@ -26,6 +26,8 @@ class IngestionLogger:
         self._logger = logging.getLogger("ingestion")
         self._logger.setLevel(logging.DEBUG)
         self._logger.propagate = False
+        self._step_times: dict[str, list[float]] = {}
+        self._batch_times: list[float] = []
 
         if self._logger.handlers:
             return
@@ -53,6 +55,7 @@ class IngestionLogger:
             yield
         finally:
             elapsed = time.perf_counter() - start
+            self._step_times.setdefault(name, []).append(elapsed)
             self._logger.info("STAGE END    [%s]  elapsed=%.3fs", name, elapsed)
 
     @contextmanager
@@ -63,11 +66,23 @@ class IngestionLogger:
             yield
         finally:
             elapsed = time.perf_counter() - start
+            self._step_times.setdefault(name, []).append(elapsed)
             self._logger.info("AUGMENTER END    [%s]  elapsed=%.3fs", name, elapsed)
 
     def batch(self, batch_num: int, total_batches: int, offset: int, size: int) -> None:
         self._logger.info(
             "BATCH  [%d/%d]  offset=%d  size=%d", batch_num, total_batches, offset, size
+        )
+
+    def batch_done(self, batch_num: int, total_batches: int, elapsed: float) -> None:
+        self._batch_times.append(elapsed)
+        avg = sum(self._batch_times) / len(self._batch_times)
+        remaining = total_batches - batch_num
+        eta_s = avg * remaining
+        eta_str = f"{int(eta_s // 3600)}h {int(eta_s % 3600 // 60)}m" if eta_s >= 3600 else f"{eta_s / 60:.1f}m" if eta_s >= 60 else f"{eta_s:.1f}s"
+        self._logger.info(
+            "BATCH DONE   [%d/%d]  elapsed=%.3fs  avg_per_batch=%.3fs  eta=%s",
+            batch_num, total_batches, elapsed, avg, eta_str,
         )
 
     def info(self, msg: str, *args) -> None:
@@ -84,3 +99,8 @@ class IngestionLogger:
             "SUMMARY  indexed=%d  skipped=%d  failed=%d  total=%d  elapsed=%.1fs",
             indexed, skipped, failed, indexed + skipped + failed, elapsed,
         )
+        if self._step_times:
+            self._logger.info("STEP AVERAGES:")
+            for step, times in self._step_times.items():
+                avg = sum(times) / len(times)
+                self._logger.info("  %-30s  avg=%.3fs  runs=%d", step, avg, len(times))

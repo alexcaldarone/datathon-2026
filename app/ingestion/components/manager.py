@@ -72,6 +72,7 @@ class IngestionManager:
                 break
 
             batch_num += 1
+            batch_start = time.perf_counter()
             _logger.batch(batch_num, total_batches, offset, len(rows))
 
             ids = [row["listing_id"] for row in rows]
@@ -106,6 +107,7 @@ class IngestionManager:
                 failed += err
 
             offset += len(rows)
+            _logger.batch_done(batch_num, total_batches, time.perf_counter() - batch_start)
 
         conn.close()
         _logger.summary(indexed, skipped, failed, time.perf_counter() - run_start)
