@@ -107,5 +107,5 @@ def parse_images_json(images_json: str):
     try:
         images = json.loads(images_json)
         return [i["url"] for i in images["images"]]
-    except (json.JSONDecodeError, TypeError):
+    except (json.JSONDecodeError, TypeError, KeyError):
         return []
