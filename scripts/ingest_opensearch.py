@@ -50,6 +50,10 @@ def main() -> None:
     parser.add_argument("--reset", action="store_true", help="Delete and recreate the index.")
     parser.add_argument("--dry-run", action="store_true", help="Init index/pipeline only, skip ingestion.")
     parser.add_argument("--limit", type=int, default=None, help="Cap number of rows to ingest (for testing).")
+    parser.add_argument(
+        "--force-fields", nargs="+", default=None, metavar="FIELD",
+        help="Force re-augmentation for these field names even if already present (e.g. vlm_features).",
+    )
     args = parser.parse_args()
 
     cfg = _load_cfg()
@@ -81,6 +85,7 @@ def main() -> None:
         pipeline_body=pipeline_body,
         limit=args.limit,
         reset=args.reset,
+        force_fields=args.force_fields,
     )
 
 

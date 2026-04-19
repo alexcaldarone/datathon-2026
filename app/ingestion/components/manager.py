@@ -50,8 +50,10 @@ class IngestionManager:
         pipeline_body: dict,
         limit: int | None,
         reset: bool,
+        force_fields: list[str] | None = None,
     ) -> None:
         run_start = time.perf_counter()
+        _force: set[str] = set(force_fields or [])
         full_index_body = self.build_index_body(index_body)
         self.client.setup(self._index, self._pipeline, full_index_body, pipeline_body, reset=reset)
 
@@ -80,6 +82,14 @@ class IngestionManager:
 
             ids = [row["listing_id"] for row in rows]
             existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
+
+            # Strip forced fields from the existing snapshot so the completeness
+            # check treats them as absent, triggering re-augmentation.
+            if _force:
+                existing = {
+                    lid: {k: v for k, v in doc.items() if k not in _force}
+                    for lid, doc in existing.items()
+                }
 
             # rows missing at least one augmenter field
             rows_to_update = [
