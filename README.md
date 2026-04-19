@@ -1,16 +1,62 @@
 # Datathon 2026 Challenge - Team 4
 
-description of implementation
+### Description of implementation
 
+We built a multi-stage, multi-modal search pipeline that transforms natural language queries into ranked real estate listings for the Swiss market.
 
-system architecture
+Our hard retrieval stage uses an LLM orchestrator to extract hard requirements from the user's natual language query to perform a first coarse filtering of the listings.
+
+Our soft retrieval stage combines seven ranking signals: BM25 text search, dense semantic embeddings, sparse lexical features, image embeddings, visual-language model scores from listing images, geo and amenity-based neighborhood features, and weighted boosting based on user preference importance. These are fused using Reciprocal Rank Fusion to generate a robust candidate ranking.
+
+### System architecture
 
 ![](/assets/aws_system_architecture.png)
 
+| Stage | Purpose |
+|---|---|
+| Hard filter | Applies strict constraints such as price, number of rooms, location, and required features to quickly reduce the search space. |
+| Soft filter | Ranks the remaining candidates using a hybrid multi-modal retrieval layer that captures semantic, visual, and neighborhood-level preferences. |
+| Reranker | Refines the top results with a stronger model and produces human-readable explanations for why each listing matches the query. |
+
+### Soft filter: scoring signals
+
+The hybrid soft filter fuses the following signals in OpenSearch:
+
+| Signal | Description |
+|---|---|
+| BM25 text matching | Lexical search across listing title, description, and full text in both the original language and English translation. |
+| Dense vector kNN | Semantic similarity between the query and each listing using 1024-dimensional text embeddings |
+| Sparse BM25 rank features | Client-side BM25 term weights stored per listing and queried via the top-30 most discriminative query terms. |
+| Image embedding kNN | Similarity between the query (embedded as text in a multimodal vector space) and listing images |
+| VLM visual scores | Eight numeric features per listing image: brightness, spaciousness, modernity, view quality, greenery, kitchen quality, condition, noise impression. Extracted by Claude Haiku at ingestion time. |
+| Geo/amenity features | Transit stop counts, school and supermarket proximity, and three composite scores (transit, walkability, family) derived from OpenStreetMap data. |
+| Weighted preference boosting | An LLM-based soft extractor maps the query to 15 preference dimensions with importance weights (1.0 must / 0.7 preferred / 0.4 nice-to-have), which drive per-field `function_score` boosts on VLM and geo features. |
+
 ### AWS challenge
 
+Our entire project is built upon AWS infrastructure. In particular:
+
+- `AWS OpenSearch` is used as a feature store where we perform soft filtering 
+
+- `AWS Bedrock` is extensively used for embedding the data and interacting with LLMs via the bedrock api
+
+- `AWS S3` for retrieving the listing imaged
+
+- `AWS CLoudWatch` was initially tried for logging
 
 ### Anthropic/Claude challege
+
+Anthropic models were extensively used througout the project. In particular:
+
+- `Claude 3 Haiku` was used to extract the image VLM features, translation and LLM reranking. This was preferred over other model due to faster response times.
+
+### Team Members
+
+- Alex Caldarone
+
+- Giacomo Ciro
+
+- Joshua Gao
 
 ---
 
