@@ -27,6 +27,7 @@ class SoftFilter(ABC):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[dict[str, Any]]:
         pass
 
@@ -36,8 +37,9 @@ class DumbSoftFilter(SoftFilter):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[dict[str, Any]]:
-        return candidates
+        return candidates[:target]
 
 
 class HybridSimilarityFilter(SoftFilter):
@@ -60,6 +62,7 @@ class HybridSimilarityFilter(SoftFilter):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[dict[str, Any]]:
         query_text: str = soft_facts.get("_query", "")
         if not query_text or not candidates:
@@ -88,18 +91,18 @@ class HybridSimilarityFilter(SoftFilter):
                 image_vector=image_vector,
                 boost_fields=boost_fields,
                 query_text_en=query_text_en,
+                target=target,
             ),
             pipeline=self._pipeline,
         )
 
         hits = resp["hits"]["hits"]
-        top_k = int(self.cfg.top_k)
-        
-        padding = []
-        if len(hits) < top_k:
-            padding = candidates[:top_k-len(hits)]
 
-        return [hit["_source"] for hit in hits][:top_k] + padding
+        padding = []
+        if len(hits) < target:
+            padding = candidates[:target - len(hits)]
+
+        return [hit["_source"] for hit in hits][:target] + padding
 
     def _build_query(
         self,
@@ -107,12 +110,12 @@ class HybridSimilarityFilter(SoftFilter):
         dense_vector: list[float],
         sparse_weights: dict[str, float],
         listing_ids: list[str],
+        target: int,
         image_vector: list[float] | None = None,
         boost_fields: list[tuple[str, float]] | None = None,
         query_text_en: str | None = None,
     ) -> dict:
         n = len(listing_ids)
-        top_k = int(self.cfg.top_k)
         candidate_filter = {"terms": {"listing_id": listing_ids}}
 
         # top-N sparse terms by BM25 weight; rank_feature (singular) is the query type
@@ -203,8 +206,8 @@ class HybridSimilarityFilter(SoftFilter):
             })
 
         return {
-            # return top_k; post_filter guarantees results come from the candidate set
-            "size": top_k,
+            # return target; post_filter guarantees results come from the candidate set
+            "size": target,
             "query": {"hybrid": {"queries": hybrid_queries}},
             # restrict final results to the hard-filtered candidate set
             "post_filter": candidate_filter,

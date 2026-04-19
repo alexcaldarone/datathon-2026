@@ -17,7 +17,6 @@ Optional env var overrides:
 import argparse
 import json
 import os
-import time
 from pathlib import Path
 
 import yaml
@@ -26,11 +25,13 @@ from omegaconf import OmegaConf
 
 from app.ingestion.components.client import OpenSearchClient
 from app.ingestion.components import IngestionManager, build_augmenters
+from app.ingestion.components.logger import IngestionLogger
 
 load_dotenv(override=True)
 
 _REPO_ROOT = Path(__file__).parent.parent
 _CFG_DIR = _REPO_ROOT / "configs" / "ingestion"
+_logger = IngestionLogger.get()
 
 
 def _load_cfg() -> object:
@@ -66,15 +67,14 @@ def main() -> None:
     client = OpenSearchClient()
     manager = IngestionManager(cfg, augmenters, client)
 
-    print(f"Connected to OpenSearch at {os.environ['OPENSEARCH_ENDPOINT']}")
+    _logger.info("Connected to OpenSearch at %s", os.environ["OPENSEARCH_ENDPOINT"])
 
     if args.dry_run:
         full_body = manager.build_index_body(index_body)
         client.setup(full_body, pipeline_body, reset=args.reset)
-        print("Dry run — skipping ingestion.")
+        _logger.info("Dry run — skipping ingestion.")
         return
 
-    start = time.time()
     manager.run(
         db_path=_REPO_ROOT / "data" / "listings.db",
         index_body=index_body,
@@ -82,7 +82,6 @@ def main() -> None:
         limit=args.limit,
         reset=args.reset,
     )
-    print(f"Elapsed: {time.time() - start:.1f}s")
 
 
 if __name__ == "__main__":

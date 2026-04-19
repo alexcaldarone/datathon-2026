@@ -15,12 +15,15 @@ soft_extractor:
   anchor_path: configs/soft_extractor_anchors.yaml
   importance_keywords_path: configs/soft_extractor_importance_keywords.yaml
 
+hard_filter:
+  target_candidates: 200
+
 soft_filter:
   class_name: HybridSimilarityFilter
-  top_k: 20
+  target_candidates: 4.0
 
 reranker:
   class_name: CohereReRanker
   model_id: "cohere.rerank-v3-5:0"
-  top_n: 10
+  target_candidates: 1.0
   region: "us-east-1"

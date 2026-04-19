@@ -25,8 +25,8 @@ def test_participant_soft_fact_modules_are_importable(monkeypatch) -> None:
     candidates = [{"listing_id": "1", "title": "Example"}]
 
     soft_facts = extract_soft_facts("bright flat")
-    filtered = filter_soft_facts(candidates, soft_facts)
-    ranked = rank_listings(filtered, soft_facts)
+    filtered = filter_soft_facts(candidates, soft_facts, target=1)
+    ranked = rank_listings(filtered, soft_facts, target=1)
 
     assert isinstance(soft_facts, dict)
     assert isinstance(filtered, list)

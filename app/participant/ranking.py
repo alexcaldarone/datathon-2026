@@ -8,9 +8,10 @@ from app.participant.components import build_reranker, Config
 def rank_listings(
     candidates: list[dict[str, Any]],
     soft_facts: dict[str, Any],
+    target: int,
 ) -> list[RankedListingResult]:
 
     cfg = Config.get_cfg()
     reranker = build_reranker(cfg)
 
-    return reranker.run(candidates, soft_facts)
+    return reranker.run(candidates, soft_facts, target)

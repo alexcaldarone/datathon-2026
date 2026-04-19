@@ -4,6 +4,10 @@ import os
 
 from opensearchpy import OpenSearch, RequestsHttpConnection
 
+from app.ingestion.components.logger import IngestionLogger
+
+_logger = IngestionLogger.get()
+
 
 class OpenSearchClient:
     """Singleton OpenSearch client shared across ingestion and retrieval."""
@@ -24,15 +28,13 @@ class OpenSearchClient:
         return self._client.search(index=index, body=body, params=params)
 
     def fetch_existing(self, index: str, ids: list[str], fields: list[str]) -> dict[str, dict]:
-        if not ids or not self._client.indices.exists(index=index):
-            return {}
-        body = {
-            "query": {"ids": {"values": ids}},
-            "_source": fields,
-            "size": len(ids),
+        """Returns {id: source} for docs that exist and have the requested fields."""
+        resp = self._client.mget(index=index, body={"ids": ids}, _source_includes=fields)
+        return {
+            doc["_id"]: doc["_source"]
+            for doc in resp["docs"]
+            if doc.get("found") and doc.get("_source")
         }
-        resp = self._client.search(index=index, body=body)
-        return {hit["_id"]: hit["_source"] for hit in resp["hits"]["hits"]}
 
     # --- ingestion ---
 
@@ -45,27 +47,18 @@ class OpenSearchClient:
         reset: bool,
     ) -> None:
         if reset and self._client.indices.exists(index=index):
-            print(f"Deleting existing index '{index}'...")
+            _logger.info("Deleting existing index '%s'...", index)
             self._client.indices.delete(index=index)
         if not self._client.indices.exists(index=index):
-            print(f"Creating index '{index}'...")
+            _logger.info("Creating index '%s'...", index)
             self._client.indices.create(index=index, body=index_body)
         else:
-            print(f"Index '{index}' already exists — skipping creation.")
-        print(f"Upserting search pipeline '{pipeline}'...")
+            _logger.info("Index '%s' already exists — skipping creation.", index)
+        _logger.info("Upserting search pipeline '%s'...", pipeline)
         self._client.transport.perform_request(
             "PUT", f"/_search/pipeline/{pipeline}", body=pipeline_body
         )
-        print("Index and pipeline ready.")
-
-    def fetch_existing(self, index: str, ids: list[str], fields: list[str]) -> dict[str, dict]:
-        """Returns {id: source} for docs that exist and have the requested fields."""
-        resp = self._client.mget(index=index, body={"ids": ids}, _source_includes=fields)
-        return {
-            doc["_id"]: doc["_source"]
-            for doc in resp["docs"]
-            if doc.get("found") and doc.get("_source")
-        }
+        _logger.info("Index and pipeline ready.")
 
     def bulk_upsert(self, docs: list[dict], num_workers: int = 4) -> tuple[int, int]:
         from opensearchpy import helpers
@@ -84,10 +77,10 @@ class OpenSearchClient:
                     ok += 1
                 else:
                     err += 1
-                    print(f"\nIndex error: {info}")
+                    _logger.error("Index error: %s", info)
         except BulkIndexError as exc:
             err += len(exc.errors)
-            print(f"\nBulk error: {exc}")
+            _logger.error("Bulk error: %s", exc)
         return ok, err
 
     @staticmethod

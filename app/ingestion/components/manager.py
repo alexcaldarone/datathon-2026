@@ -1,17 +1,17 @@
 import copy
+import math
 import sqlite3
+import time
 from pathlib import Path
 
 from omegaconf import DictConfig
-from tqdm import tqdm
 
 from app.ingestion.components.augmenters import Augmenter
 from app.ingestion.components.client import OpenSearchClient
+from app.ingestion.components.logger import IngestionLogger
 from app.ingestion.components.utils import parse_features, row_to_full_text, parse_images_json, download_images_batch
 
-def _is_complete(source: dict, fields: list[str]) -> bool:
-    return all(source.get(f) for f in fields)
-
+_logger = IngestionLogger.get()
 
 _QUERY = """
     SELECT listing_id, title, description, city, canton, postal_code,
@@ -48,6 +48,7 @@ class IngestionManager:
         limit: int | None,
         reset: bool,
     ) -> None:
+        run_start = time.perf_counter()
         full_index_body = self.build_index_body(index_body)
         self.client.setup(self._index, self._pipeline, full_index_body, pipeline_body, reset=reset)
 
@@ -61,51 +62,53 @@ class IngestionManager:
         augmenter_fields = [aug.field_name for aug in self.augmenters]
         indexed = failed = skipped = offset = 0
         batch_size = int(self.cfg.default_batch)
+        total_batches = math.ceil(total / batch_size)
+        batch_num = 0
 
-        with tqdm(total=total, unit="doc", desc="Ingesting") as bar:
-            while offset < total:
-                n = min(batch_size, total - offset)
-                rows = conn.execute(_QUERY, (n, offset)).fetchall()
-                if not rows:
-                    break
+        while offset < total:
+            n = min(batch_size, total - offset)
+            rows = conn.execute(_QUERY, (n, offset)).fetchall()
+            if not rows:
+                break
 
-                # check which docs already have all augmenter fields populated
-                ids = [row["listing_id"] for row in rows]
-                existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
-                new_rows = [
-                    row for row in rows
-                    if not _is_complete(existing.get(row["listing_id"], {}), augmenter_fields)
-                ]
-                skipped += len(rows) - len(new_rows)
+            batch_num += 1
+            _logger.batch(batch_num, total_batches, offset, len(rows))
 
-                if new_rows:
-                    listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
+            ids = [row["listing_id"] for row in rows]
+            existing = self.client.fetch_existing(self._index, ids, augmenter_fields)
+            new_rows = [
+                row for row in rows
+                if not _is_complete(existing.get(row["listing_id"], {}), augmenter_fields)
+            ]
+            skipped += len(rows) - len(new_rows)
 
-                    # download images once for the whole batch
-                    download_images_batch(listings, max_workers=int(self.cfg.get("image_download_workers", 8)), request_timeout_s=self.cfg.image_request_timeout_s)
+            if new_rows:
+                listings = [dict(row) | {"full_text": row_to_full_text(row)} for row in new_rows]
 
-                    augmented: dict[str, list] = {}
-                    for aug in self.augmenters:
+                with _logger.stage("image_download"):
+                    download_images_batch(
+                        listings,
+                        max_workers=int(self.cfg.get("image_download_workers", 8)),
+                        request_timeout_s=self.cfg.image_request_timeout_s,
+                        target_width=self.cfg.get("image_width"),
+                        target_height=self.cfg.get("image_height"),
+                    )
+
+                augmented: dict[str, list] = {}
+                for aug in self.augmenters:
+                    with _logger.augmenter(aug.field_name):
                         features = aug.augment_batch(listings)
-                        augmented[aug.field_name] = [f.content for f in features]
+                    augmented[aug.field_name] = [f.content for f in features]
 
-                    docs = self._build_docs(new_rows, listings, augmented)
-                    ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)
-                    indexed += ok
-                    failed += err
+                docs = self._build_docs(new_rows, listings, augmented)
+                ok, err = self.client.bulk_upsert(docs, num_workers=self.cfg.upsert_workers)
+                indexed += ok
+                failed += err
 
-                offset += len(rows)
-                bar.update(len(rows))
+            offset += len(rows)
 
         conn.close()
-        print(
-            f"\n{'─' * 40}\n"
-            f"  Indexed : {indexed}\n"
-            f"  Skipped : {skipped}  (already complete)\n"
-            f"  Failed  : {failed}\n"
-            f"  Total   : {indexed + skipped + failed}\n"
-            f"{'─' * 40}"
-        )
+        _logger.summary(indexed, skipped, failed, time.perf_counter() - run_start)
 
     def _build_docs(
         self,

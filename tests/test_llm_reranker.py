@@ -47,12 +47,12 @@ _CFG = OmegaConf.create({
 
 def test_llm_reranker_empty_candidates() -> None:
     reranker = LLMReRanker(_CFG)
-    assert reranker.run([], {"query": "flat in Zurich"}) == []
+    assert reranker.run([], {"query": "flat in Zurich"}, target=5) == []
 
 
 def test_llm_reranker_returns_ranked_results() -> None:
     reranker = LLMReRanker(_CFG)
-    results = reranker.run([_CANDIDATE_A, _CANDIDATE_B], {"query": "3-room flat in Zurich"})
+    results = reranker.run([_CANDIDATE_A, _CANDIDATE_B], {"query": "3-room flat in Zurich"}, target=2)
 
     assert len(results) == 2
     assert all(isinstance(r, RankedListingResult) for r in results)

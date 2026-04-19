@@ -11,7 +11,7 @@ def test_extract_soft_facts_returns_stub_structure() -> None:
 def test_filter_soft_facts_returns_candidate_subset() -> None:
     candidates = [{"listing_id": "1"}, {"listing_id": "2"}]
 
-    filtered = filter_soft_facts(candidates, {"raw_query": "quiet"})
+    filtered = filter_soft_facts(candidates, {"raw_query": "quiet"}, target=2)
 
     assert isinstance(filtered, list)
     assert {item["listing_id"] for item in filtered} <= {"1", "2"}

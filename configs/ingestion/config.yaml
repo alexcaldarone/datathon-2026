@@ -9,6 +9,8 @@ overpass_workers: 5
 upsert_workers: 50
 image_download_workers: 50
 image_request_timeout_s: 30
+image_width: 512
+image_height: 512
 
 enable_image_embeddings: true
 enable_vlm_features: true

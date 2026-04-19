@@ -39,6 +39,7 @@ class ReRanker(ABC):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[RankedListingResult]:
         pass
 
@@ -48,6 +49,7 @@ class DumbReRanker(ReRanker):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[RankedListingResult]:
         return [
             RankedListingResult(
@@ -56,7 +58,7 @@ class DumbReRanker(ReRanker):
                 reason="Matched hard filters; soft ranking stub.",
                 listing=_to_listing_data(c),
             )
-            for c in candidates
+            for c in candidates[:target]
         ]
 
 
@@ -74,6 +76,7 @@ class LLMReRanker(ReRanker):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[RankedListingResult]:
         if not candidates:
             return []
@@ -175,6 +178,7 @@ class CohereReRanker(ReRanker):
         self,
         candidates: list[dict[str, Any]],
         soft_facts: dict[str, Any],
+        target: int,
     ) -> list[RankedListingResult]:
         if not candidates:
             return []
@@ -188,10 +192,10 @@ class CohereReRanker(ReRanker):
                     reason="No query provided; returning unranked.",
                     listing=_to_listing_data(c),
                 )
-                for c in candidates
+                for c in candidates[:target]
             ]
         texts = [_to_document_text(c) for c in candidates]
-        top_n = min(int(self.cfg.top_n), len(candidates))
+        top_n = min(target, len(candidates))
 
         body = json.dumps({
             "query": query,

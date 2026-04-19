@@ -29,7 +29,6 @@ _CANDIDATE = {
 _CFG = OmegaConf.create({
     "class_name": "CohereReRanker",
     "model_id": "cohere.rerank-v3-5:0",
-    "top_n": 2,
     "region": "us-east-1",
 })
 
@@ -37,7 +36,7 @@ _CFG = OmegaConf.create({
 def test_dumb_reranker_returns_all_candidates() -> None:
     cfg = OmegaConf.create({"class_name": "DumbReRanker"})
     reranker = DumbReRanker(cfg)
-    results = reranker.run([_CANDIDATE], {})
+    results = reranker.run([_CANDIDATE], {}, target=1)
 
     assert len(results) == 1
     assert isinstance(results[0], RankedListingResult)
@@ -50,7 +49,7 @@ def test_cohere_reranker_orders_by_relevance_score() -> None:
     candidate_b = {**_CANDIDATE, "listing_id": "2", "title": "Flat B"}
 
     reranker = CohereReRanker(_CFG)
-    results = reranker.run([candidate_a, candidate_b], {"query": "flat in Zurich"})
+    results = reranker.run([candidate_a, candidate_b], {"query": "flat in Zurich"}, target=2)
 
     assert len(results) == 2
     assert all(isinstance(r, RankedListingResult) for r in results)
@@ -61,7 +60,7 @@ def test_cohere_reranker_orders_by_relevance_score() -> None:
 
 def test_cohere_reranker_empty_candidates() -> None:
     reranker = CohereReRanker(_CFG)
-    results = reranker.run([], {"query": "flat"})
+    results = reranker.run([], {"query": "flat"}, target=5)
 
     assert results == []
 
@@ -91,6 +90,7 @@ def test_rank_listings_returns_ranked_shape() -> None:
             }
         ],
         soft_facts={"query": "bright flat in Zurich"},
+        target=1,
     )
 
     assert len(ranked) == 1

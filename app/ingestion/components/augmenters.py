@@ -16,6 +16,10 @@ import requests
 from omegaconf import DictConfig, OmegaConf
 from pydantic import BaseModel
 
+from app.ingestion.components.logger import IngestionLogger
+
+_logger = IngestionLogger.get()
+
 
 
 def build_augmenters(cfg: DictConfig) -> list["Augmenter"]:
@@ -127,7 +131,7 @@ class DenseEmbeddingAugmenter(Augmenter):
                 if attempt == retries - 1:
                     raise
                 wait = 2 ** attempt
-                print(f"\nEmbedding error (attempt {attempt + 1}): {exc}. Retrying in {wait}s...")
+                _logger.warning("Embedding error (attempt %d): %s. Retrying in %ds...", attempt + 1, exc, wait)
                 time.sleep(wait)
         return []
 
@@ -241,7 +245,7 @@ class ImageEmbeddingAugmenter(Augmenter):
                 if attempt == retries - 1:
                     raise
                 wait = 2 ** attempt
-                print(f"\nImage embedding error (attempt {attempt + 1}): {exc}. Retrying in {wait}s...")
+                _logger.warning("Image embedding error (attempt %d): %s. Retrying in %ds...", attempt + 1, exc, wait)
                 time.sleep(wait)
         return []
 
@@ -323,7 +327,7 @@ class VLMFeatureAugmenter(Augmenter):
                 return self._parse_scores(text)
             except Exception as exc:
                 if attempt == retries - 1:
-                    print(f"VLM analysis failed: {exc}")
+                    _logger.error("VLM analysis failed: %s", exc)
                     return {}
                 time.sleep(2 ** attempt)
         return {}
@@ -428,7 +432,7 @@ class TranslationAugmenter(Augmenter):
                 return raw["content"][0]["text"].strip()
             except Exception as exc:
                 if attempt == retries - 1:
-                    print(f"Translation failed: {exc}")
+                    _logger.error("Translation failed: %s", exc)
                     return text  # fallback: return original
                 time.sleep(2 ** attempt)
         return text
@@ -536,7 +540,7 @@ out body;
                 return resp.json()
             except Exception as exc:
                 if attempt == retries - 1:
-                    print(f"Overpass query failed for ({lat}, {lon}): {exc}")
+                    _logger.error("Overpass query failed for (%s, %s): %s", lat, lon, exc)
                     return {"elements": []}
                 time.sleep(2 ** attempt)
         return {"elements": []}
@@ -761,7 +765,7 @@ class AnchorsAugmenter(Augmenter):
                 if attempt == retries - 1:
                     raise
                 wait = 2 ** attempt
-                print(f"\nAnchor embedding error (attempt {attempt + 1}): {exc}. Retrying in {wait}s...")
+                _logger.warning("Anchor embedding error (attempt %d): %s. Retrying in %ds...", attempt + 1, exc, wait)
                 time.sleep(wait)
         return []
 
