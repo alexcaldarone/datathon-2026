@@ -7,6 +7,7 @@ from typing import Any
 import yaml
 
 from app.participant.components import build_soft_extractor, Config
+from app.participant.components.translator import is_english, translate_to_english
 
 # maps anchor dimension names to OpenSearch boost fields (VLM + geo features)
 _ANCHOR_TO_BOOST: dict[str, str] = {
@@ -37,10 +38,10 @@ def _load_anchors() -> dict[str, list[str]]:
     return _anchors
 
 
-def _detect_boost_fields(query: str) -> list[str]:
+def _detect_boost_fields(query: str) -> list[tuple[str, float]]:
     query_lower = query.lower()
     anchors = _load_anchors()
-    matched: list[str] = []
+    matched: list[tuple[str, float]] = []
     for dimension, phrases in anchors.items():
         boost_field = _ANCHOR_TO_BOOST.get(dimension)
         if not boost_field:
@@ -50,18 +51,52 @@ def _detect_boost_fields(query: str) -> list[str]:
             words = re.findall(r"[a-zäöüéèàâêîôû]+", phrase.lower())
             # match if at least one distinctive word (>3 chars) appears
             if any(w in query_lower for w in words if len(w) > 3):
-                matched.append(boost_field)
+                weight = _detect_importance(query_lower)
+                matched.append((boost_field, weight))
                 break
     return matched
 
 
-def extract_soft_facts(query: str) -> dict[str, Any]:
+def _detect_importance(query: str) -> float:
+    importance_path = Path(__file__).parents[1] / "configs" / "soft_extractor_importance_keywords.yaml"
+    if not importance_path.exists():
+        importance_path = Path(__file__).parents[2] / "configs" / "soft_extractor_importance_keywords.yaml"
+    with open(importance_path) as f:
+        levels: dict[str, list[str]] = yaml.safe_load(f) or {}
+    # check from highest weight down, return first match
+    for weight_str in sorted(levels.keys(), reverse=True):
+        for keyword in levels[weight_str]:
+            if keyword.lower() in query:
+                return float(weight_str)
+    return 0.6  # default: moderate preference
 
+
+def extract_soft_facts(query: str) -> dict[str, Any]:
     cfg = Config.get_cfg()
     soft_extractor = build_soft_extractor(cfg)
     soft_facts = soft_extractor.run(query)
     # always include the original query so retrieval-based filters can use it
     soft_facts["_query"] = query
-    # detect which VLM/geo fields to boost based on anchor matching
-    soft_facts["boost_fields"] = _detect_boost_fields(query)
+
+    # build boost fields: prefer LLM preferences, fall back to keyword detection
+    preferences = soft_facts.get("preferences", [])
+    if preferences:
+        soft_facts["boost_fields"] = _preferences_to_boost_fields(preferences)
+    else:
+        soft_facts["boost_fields"] = _detect_boost_fields(query)
+
+    # translate non-English queries so BM25 matches against full_text_en
+    if not is_english(query):
+        model_id = cfg.soft_extractor.get("model_id", "anthropic.claude-3-haiku-20240307-v1:0")
+        soft_facts["_query_en"] = translate_to_english(query, model_id)
+
     return soft_facts
+
+
+def _preferences_to_boost_fields(preferences: list) -> list[tuple[str, float]]:
+    boost_fields: list[tuple[str, float]] = []
+    for pref in preferences:
+        field = _ANCHOR_TO_BOOST.get(pref.dimension)
+        if field:
+            boost_fields.append((field, pref.weight))
+    return boost_fields

@@ -13,7 +13,15 @@ def test_extract_hard_facts_returns_stub_structure() -> None:
     assert isinstance(result, HardFilters)
 
 
-def test_participant_soft_fact_modules_are_importable() -> None:
+def test_participant_soft_fact_modules_are_importable(monkeypatch) -> None:
+    from app.participant.components.utils import Config
+    from omegaconf import OmegaConf
+
+    cfg = Config.get_cfg()
+    patched = OmegaConf.to_container(cfg, resolve=True)
+    patched["soft_extractor"]["class_name"] = "DumbSoftExtractor"
+    monkeypatch.setattr(Config, "_cfg", OmegaConf.create(patched))
+
     candidates = [{"listing_id": "1", "title": "Example"}]
 
     soft_facts = extract_soft_facts("bright flat")

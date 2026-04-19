@@ -76,5 +76,14 @@ class ValidationResult(BaseModel):
     questions: list[str] = []
 
 
+class SoftPreference(BaseModel):
+    dimension: str = Field(description="Anchor dimension name from the provided list")
+    weight: float = Field(ge=0.0, le=1.0, description="Importance: 1.0=must, 0.7=prefer, 0.4=nice-to-have")
+
+
+class SoftFacts(BaseModel):
+    preferences: list[SoftPreference] = Field(default_factory=list)
+
+
 class HealthResponse(BaseModel):
     status: str
