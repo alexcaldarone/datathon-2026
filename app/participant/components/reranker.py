@@ -6,9 +6,22 @@ from typing import Any
 
 import boto3
 from omegaconf import DictConfig
+from pydantic import BaseModel as _BaseModel
+from pydantic_ai import Agent
 
 from app.models.schemas import ListingData, RankedListingResult
-from app.participant.components.utils import _instantiate
+from app.participant.components.utils import _instantiate, read_system_prompt
+
+
+class _RankedItem(_BaseModel):
+    listing_id: str
+    score: float  # 0.0–1.0, higher = more relevant
+    reason: str
+
+
+class _RankingOutput(_BaseModel):
+    rankings: list[_RankedItem]
+
 
 _MODULE = "app.participant.components.reranker"
 
@@ -44,6 +57,49 @@ class DumbReRanker(ReRanker):
                 listing=_to_listing_data(c),
             )
             for c in candidates
+        ]
+
+
+class LLMReRanker(ReRanker):
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+        system_prompt = read_system_prompt(self.__class__.__name__)
+        self._agent = Agent(
+            f"bedrock:{cfg.model_id}",
+            system_prompt=system_prompt,
+            output_type=_RankingOutput,
+        )
+
+    def run(
+        self,
+        candidates: list[dict[str, Any]],
+        soft_facts: dict[str, Any],
+    ) -> list[RankedListingResult]:
+        if not candidates:
+            return []
+
+        query = soft_facts.get("query", "")
+        candidate_index = {str(c["listing_id"]): c for c in candidates}
+
+        prompt = json.dumps({
+            "query": query,
+            "candidates": [
+                {"listing_id": str(c["listing_id"]), "text": _to_document_text(c)}
+                for c in candidates
+            ],
+        })
+
+        result = self._agent.run_sync(prompt)
+
+        return [
+            RankedListingResult(
+                listing_id=item.listing_id,
+                score=item.score,
+                reason=item.reason,
+                listing=_to_listing_data(candidate_index[item.listing_id]),
+            )
+            for item in result.output.rankings
+            if item.listing_id in candidate_index
         ]
 
 
