@@ -3,13 +3,22 @@ from __future__ import annotations
 from typing import Any
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from app.models.valid_values import (
+    Canton,
+    Feature,
+    ObjectCategory,
+    OfferType,
+    VALID_CITIES,
+    VALID_POSTAL_CODES,
+)
 
 
 class HardFilters(BaseModel):
     city: list[str] | None = None
     postal_code: list[str] | None = None
-    canton: str | None = None
+    canton: Canton | None = None
     min_price: int | None = Field(default=None, ge=0)
     max_price: int | None = Field(default=None, ge=0)
     min_rooms: float | None = Field(default=None, ge=0)
@@ -17,12 +26,32 @@ class HardFilters(BaseModel):
     latitude: float | None = None
     longitude: float | None = None
     radius_km: float | None = Field(default=None, ge=0)
-    features: list[str] | None = None
-    offer_type: str | None = None
-    object_category: list[str] | None = None
+    features: list[Feature] | None = None
+    offer_type: OfferType | None = None
+    object_category: list[ObjectCategory] | None = None
     limit: int = Field(default=20, ge=1, le=500)
     offset: int = Field(default=0, ge=0)
     sort_by: Literal["price_asc", "price_desc", "rooms_asc", "rooms_desc"] | None = None
+
+    @field_validator("city", mode="before")
+    @classmethod
+    def validate_cities(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return None
+        invalid = [c for c in v if c not in VALID_CITIES]
+        if invalid:
+            raise ValueError(f"Unknown cities: {invalid}")
+        return v
+
+    @field_validator("postal_code", mode="before")
+    @classmethod
+    def validate_postal_codes(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return None
+        invalid = [p for p in v if p not in VALID_POSTAL_CODES]
+        if invalid:
+            raise ValueError(f"Unknown postal codes: {invalid}")
+        return v
 
 
 class ListingsQueryRequest(BaseModel):

@@ -26,7 +26,9 @@ def test_post_listings_returns_ranked_results(tmp_path: Path) -> None:
     from app.main import app
 
     with TestClient(app) as client:
-        response = client.post("/listings", json={"query": "3 room flat in winterthur"})
+        response = client.post("/listings", json={
+            "query": "Apartments for rent in Zurich Oerlikon for less than 3000 CHF per month"
+        })
 
     assert response.status_code == 200
     body = response.json()

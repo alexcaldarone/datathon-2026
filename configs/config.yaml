@@ -3,15 +3,21 @@ paths:
 
 query_validator:
   class_name: LLMQueryValidator
-  model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "amazon.nova-micro-v1:0"
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 
 hard_extractor:
   class_name: LLMHardFactExtractor
-  model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "amazon.nova-micro-v1:0"
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
 
 soft_extractor:
   class_name: LLMSoftExtractor
-  model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "amazon.nova-micro-v1:0"
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
   anchor_path: configs/soft_extractor_anchors.yaml
   importance_keywords_path: configs/soft_extractor_importance_keywords.yaml
 
@@ -20,7 +26,7 @@ hard_filter:
 
 soft_filter:
   class_name: AugmentorFilter
-  target_candidates: 4.0
+  target_candidates: 50
   enable_dense_vector: true
   enable_sparse_weights: true
   enable_image_vector: true
@@ -34,6 +40,9 @@ reranker:
   # class_name: CohereReRanker
   # model_id: "cohere.rerank-v3-5:0"
   class_name: LLMReRanker
-  model_id: "us.anthropic.claude-sonnet-4-6"
-  target_candidates: 1.0
+  # model_id: "us.anthropic.claude-sonnet-4-6"
+  # model_id: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  # model_id: "amazon.nova-micro-v1:0"
+  model_id: "anthropic.claude-3-haiku-20240307-v1:0"
+  target_candidates: 10
   region: "us-east-1"
