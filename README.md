@@ -31,6 +31,7 @@ The hybrid soft filter fuses the following signals in OpenSearch:
 | VLM visual scores | Eight numeric features per listing image: brightness, spaciousness, modernity, view quality, greenery, kitchen quality, condition, noise impression. Extracted by Claude Haiku at ingestion time. |
 | Geo/amenity features | Transit stop counts, school and supermarket proximity, and three composite scores (transit, walkability, family) derived from OpenStreetMap data. |
 | Weighted preference boosting | An LLM-based soft extractor maps the query to 15 preference dimensions with importance weights (1.0 must / 0.7 preferred / 0.4 nice-to-have), which drive per-field `function_score` boosts on VLM and geo features. |
+| Anchor similarity scores | Pre-computed cosine similarity between each listing's text embedding and a fixed set of anchor phrases representing a feature dimension (e.g., daylight, noise level etc.)|
 
 ### Public Endpoints
 
