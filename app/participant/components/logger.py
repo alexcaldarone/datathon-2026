@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import logging
 import logging.handlers
 import sys
@@ -16,6 +17,20 @@ from app.models.schemas import HardFilters, ValidationResult
 _INGESTION_CFG_PATH = Path(__file__).parents[3] / "configs" / "ingestion" / "config.yaml"
 
 _LOGS_DIR = Path(__file__).parent.parent.parent.parent / "logs"
+
+
+class _LockedRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    def emit(self, record: logging.LogRecord) -> None:
+        if self.stream is None:
+            self.stream = self._open()
+        fcntl.flock(self.stream.fileno(), fcntl.LOCK_EX)
+        try:
+            super().emit(record)
+        finally:
+            try:
+                fcntl.flock(self.stream.fileno(), fcntl.LOCK_UN)
+            except OSError:
+                pass
 
 
 class PipelineLogger:
@@ -46,7 +61,7 @@ class PipelineLogger:
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(fmt)
 
-        file_handler = logging.handlers.RotatingFileHandler(
+        file_handler = _LockedRotatingFileHandler(
             _LOGS_DIR / "server.log", maxBytes=5_000_000, backupCount=3
         )
         file_handler.setFormatter(fmt)

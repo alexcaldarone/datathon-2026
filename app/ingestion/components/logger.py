@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import logging
 import logging.handlers
 import sys
@@ -8,6 +9,20 @@ from contextlib import contextmanager
 from pathlib import Path
 
 _LOGS_DIR = Path(__file__).parent.parent.parent.parent / "logs"
+
+
+class _LockedRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    def emit(self, record: logging.LogRecord) -> None:
+        if self.stream is None:
+            self.stream = self._open()
+        fcntl.flock(self.stream.fileno(), fcntl.LOCK_EX)
+        try:
+            super().emit(record)
+        finally:
+            try:
+                fcntl.flock(self.stream.fileno(), fcntl.LOCK_UN)
+            except OSError:
+                pass
 
 
 class IngestionLogger:
@@ -41,7 +56,7 @@ class IngestionLogger:
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(fmt)
 
-        file_handler = logging.handlers.RotatingFileHandler(
+        file_handler = _LockedRotatingFileHandler(
             _LOGS_DIR / "ingestion.log", maxBytes=5_000_000, backupCount=3
         )
         file_handler.setFormatter(fmt)
