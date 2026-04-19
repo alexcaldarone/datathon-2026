@@ -32,6 +32,12 @@ The hybrid soft filter fuses the following signals in OpenSearch:
 | Geo/amenity features | Transit stop counts, school and supermarket proximity, and three composite scores (transit, walkability, family) derived from OpenStreetMap data. |
 | Weighted preference boosting | An LLM-based soft extractor maps the query to 15 preference dimensions with importance weights (1.0 must / 0.7 preferred / 0.4 nice-to-have), which drive per-field `function_score` boosts on VLM and geo features. |
 
+### Public Endpoints
+
+- **MCP**: `https://formal-beautifully-gen-cancelled.trycloudflare.com/mcp`
+
+- **API**: `https://thy-operational-unlock-italic.trycloudflare.com/docs`
+
 ### Team Members
 
 - Alex Caldarone
