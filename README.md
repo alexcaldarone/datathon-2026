@@ -1,3 +1,19 @@
+# Datathon 2026 Challenge - Team 4
+
+description of implementation
+
+
+system architecture
+
+![](/assets/aws_system_architecture.png)
+
+### AWS challenge
+
+
+### Anthropic/Claude challege
+
+---
+
 # Datathon 2026 Challenge Harness
 
 This repository is a minimal starter harness for participants building listing search and ranking systems.
