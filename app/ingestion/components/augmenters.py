@@ -676,6 +676,7 @@ class AnchorsAugmenter(Augmenter):
         self._agg_fn = cfg.get("anchor_aggregation", "max")
         self._anchor_path = cfg.get("anchor_path", "configs/soft_extractor_anchors.yaml")
         self._cache_path = cfg.get("anchor_cache_path", ".cache/anchors_embeddings.npz")
+        os.makedirs(os.path.dirname(self._cache_path), exist_ok=True)
         self._anchors: dict[str, list[str]] = OmegaConf.to_container(OmegaConf.load(self._anchor_path))  # type: ignore[assignment]
         self._cache_lock = threading.Lock()
         self._embedding_cache: dict[str, np.ndarray] = self._load_cache()

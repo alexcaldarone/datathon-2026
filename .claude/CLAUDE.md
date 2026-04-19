@@ -31,6 +31,7 @@ Core participant logic resides in `app/participant/`:
 * **Storage:** SQLite (auto-generated from `raw_data/*.csv`).
 * **Orchestration:** Logic flow is managed in `app/harness/search_service.py`.
 * **components:** the different components of the pipeline are contained in `app/participant/components`. At the top there is the build function, then the abstract interface, and eventually all the concrete implementation.
+* **system prompts:** prompts are for the {modelName} are stored in app/participant/prompts/{modelName}.md and should be loaded using the helper function `app/participant/components/utils.py:read_system_prompt()`
 
 ## Environment Variables
 ```bash
